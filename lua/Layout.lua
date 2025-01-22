@@ -13,27 +13,22 @@ function Layout.new_helix_like(picker, width, height)
   self.width = width
   self.height = height
   self.picker = picker
-  self._size_adjust_autogroup = vim.api.nvim_create_augroup("PickerLayoutAdjustSizeOnChange", { clear = true })
   self.is_closed = false
   self:draw()
 
-  vim.api.nvim_create_autocmd("WinResized", {
-    group = self._size_adjust_autogroup,
-    callback = function()
-      if not self.is_closed then
-        self:close()
-        self:draw()
-      end
-    end,
-  })
+  -- vim.api.nvim_create_autocmd("WinResized", {
+  --   group = vim.api.nvim_create_augroup("PickerLayoutAdjustSizeOnChange", { clear = true }),
+  --   callback = function()
+  --     if not self.is_closed then
+  --       self:close()
+  --       self:draw()
+  --     end
+  --   end,
+  -- })
 
   return self
 end
 
-function Layout:destroy()
-  self:close()
-  vim.api.nvim_clear_autocmds({group = self._size_adjust_autogroup})
-end
 
 function Layout:close()
   self.is_closed = true
@@ -43,6 +38,7 @@ function Layout:close()
     end
   end
   vim.cmd.stopinsert()
+  print("stopinsert")
 end
 
 function Layout:draw()

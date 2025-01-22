@@ -27,23 +27,13 @@ function Picker.new(source, matcher, layout)
     buffer = self.qbuf,
   })
 
-
-  local screen_height = vim.o.lines
-  local ns_id = vim.api.nvim_create_namespace("MyNamespace")
-
-  local function render_selected()
-    vim.api.nvim_buf_clear_namespace(self.rbuf, ns_id, 0, -1)
-    vim.api.nvim_buf_add_highlight(self.rbuf, ns_id, "Cursor", self.selected, 0, -1)
-    local line = vim.api.nvim_buf_get_lines(self.rbuf, self.selected, self.selected + 1, false)[1]
-  end
-
   vim.keymap.set({ "i" }, "<down>", function()
     local items_available = self.matcher:matched_item_count()
     if items_available == 0 then
       return
     end
     self.selected = math.min(self.selected + 1, items_available - 1)
-    render_selected()
+    self:render()
   end, { buffer = self.qbuf })
 
   vim.keymap.set({ "i" }, "<up>", function()
@@ -52,7 +42,7 @@ function Picker.new(source, matcher, layout)
       return
     end
     self.selected = math.max(self.selected - 1, 0)
-    render_selected()
+    self:render()
   end, { buffer = self.qbuf })
 
   vim.keymap.set({ "i" }, "<CR>", function()
@@ -83,13 +73,31 @@ function Picker:destroy()
   vim.api.nvim_buf_delete(self.pbuf, { force = true })
 end
 
+function Picker:render()
+  -- NOTE: Should I add events mechanism and add PickerView?
+  self.ns_id = vim.api.nvim_create_namespace("MyNamespace")
+  local values = self.matcher:matched_items()
+  -- NOTE: Should add only line highlight on <down> and <up>
+  vim.schedule(function()
+    vim.api.nvim_buf_set_lines(self.rbuf, 0, -1, false, values)
+    vim.api.nvim_buf_clear_namespace(self.rbuf, self.ns_id, 0, -1)
+    if #values > 0 then
+      vim.api.nvim_buf_add_highlight(self.rbuf, self.ns_id, "Cursor", self.selected, 0, -1)
+      local line = vim.api.nvim_buf_get_lines(self.rbuf, self.selected, self.selected + 1, false)[1]
+      local ok, file = pcall(io.open, line, "r")
+      if ok then
+        local lines = vim.iter(file:lines()):totable()
+        vim.api.nvim_buf_set_lines(self.pbuf, 0, -1, false, lines)
+        vim.treesitter.start(self.pbuf, "lua")
+      end
+    end
+  end)
+end
+
 ---@param query string
 function Picker:process_query(query)
   self.matcher:reparse(query)
-  local values = self.matcher:matched_items()
-  vim.schedule(function()
-    vim.api.nvim_buf_set_lines(self.rbuf, 0, -1, false, values)
-  end)
+  self:render()
 end
 
 return Picker
