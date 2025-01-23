@@ -1,4 +1,4 @@
-# An experimental fuzzy finder powered by the Rust Nucleo crate, focused on maximum performance.
+# An experimental fuzzy finder powered by the Rust [Nucleo crate](https://crates.io/crates/nucleo) (implemented and used by helix editor), focused on maximum performance.
 
 ## WIP, DONT TRY TO USE IT, I WARNED YOU!
 
@@ -17,6 +17,6 @@
 }
 
 ```
-NOTE: Building from source is currently the only available option.
-NOTE: This plugin will probably only work for Linux at the moment.
-NOTE: This plugin is 1% ready and is more of a proof of concept than a really working something
+- NOTE: Building from source is currently the only available option.  
+- NOTE: This plugin will probably only work for Linux at the moment.  
+- NOTE: This plugin is 1% ready and is more of a proof of concept than a really working something  
