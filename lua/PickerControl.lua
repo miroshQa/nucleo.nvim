@@ -1,15 +1,23 @@
 local state = require("NucleoState")
 local PickerView = require("PickerView")
+local timer = vim.uv.new_timer()
 
 vim.api.nvim_create_autocmd("TextChangedI", {
   group = vim.api.nvim_create_augroup("UpdateResultsOnQueryChange", { clear = true }),
   callback = function()
-    print("query changed" .. os.time())
-    local active = state.last_picker
-    local pattern = vim.trim(vim.api.nvim_get_current_line())
-    active.matcher.pattern = pattern
-    active.matcher:reparse()
-    PickerView.render(active)
+    if timer:is_active() then
+      timer:stop()
+    end
+
+    timer:start(30, 0, function()
+      vim.schedule(function ()
+        local active = state.last_picker
+        local pattern = vim.trim(vim.api.nvim_get_current_line())
+        active.matcher.pattern = pattern
+        active.matcher:reparse()
+        PickerView.render(active)
+      end)
+    end)
   end,
   buffer = PickerView.qbuf,
 })
