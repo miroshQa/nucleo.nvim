@@ -7,6 +7,7 @@ self.is_closed = true
 self.qbuf = vim.api.nvim_create_buf(false, true)
 self.rbuf = vim.api.nvim_create_buf(false, true)
 self.pbuf = vim.api.nvim_create_buf(false, true)
+-- vim.bo[self.qbuf].buftype = "prompt"
 
 function self.close()
   print("trying to close")
@@ -20,16 +21,33 @@ function self.close()
   vim.cmd.stopinsert()
 end
 
+
+local ns_id = vim.api.nvim_create_namespace('demo')
+local mark_id = nil
 ---@param picker Picker
 function self.render(picker)
   if self.is_closed then
     self._instantiate_windows()
     self.is_closed = false
+    vim.cmd.startinsert()
   end
 
   self.ns_id = vim.api.nvim_create_namespace("MyNamespace")
   local rwin_size = vim.api.nvim_win_get_height(self.rwin)
   local values = picker.matcher:matched_items(0, picker.selected + rwin_size)
+  local total = picker.matcher:item_count()
+  local matched = picker.matcher:matched_item_count()
+
+  if mark_id then
+    vim.api.nvim_buf_del_extmark(self.qbuf, ns_id, mark_id)
+  end
+
+  mark_id = vim.api.nvim_buf_set_extmark(self.qbuf, ns_id, 0, -1, {
+    id = 1,
+    virt_text = {{matched .. "/" .. total}},
+    virt_text_pos = 'right_align',
+  })
+
   vim.schedule(function()
     vim.api.nvim_buf_set_lines(self.rbuf, 0, -1, false, values)
     -- if #values > 0 then
@@ -42,7 +60,6 @@ function self.render(picker)
     --   end
     -- end
   end)
-  vim.cmd.startinsert()
 end
 
 function self.clear()
