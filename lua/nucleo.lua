@@ -1,4 +1,5 @@
---- thanks to blink-cmp for this lifehack
+local M = {}
+
 local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "../nucleo_matcher/target/release/lib?.so"
 package.cpath = package.cpath .. ";" .. libpath
 
@@ -10,11 +11,12 @@ Matcher = require("nucleo_matcher")
 local FilesSource = require("FilesSource")
 local state = require("NucleoState")
 
-local function fuzzyFinder()
+function M.files()
   local source = FilesSource.new()
   state.last_picker = Picker.new(source, Matcher)
   PickerView.clear()
   PickerView.render(state.last_picker)
 end
 
-return fuzzyFinder
+
+return M
