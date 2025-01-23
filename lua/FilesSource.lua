@@ -14,7 +14,7 @@ function Files:get(callback)
   local handle
 
   handle = vim.uv.spawn('rg', {
-    args = { "--files", "--no-messages", "--color", "never" },
+    args = { "--files", "--no-messages", "--color", "never", "--hidden" },
     stdio = { nil, stdout, nil },
   }, function(code, signal)
     stdout:close()

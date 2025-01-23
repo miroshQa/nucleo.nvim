@@ -1,0 +1,12 @@
+[package]
+name = "nucleo_matcher"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+nucleo = "0.5.0"
+mlua = { version = "0.10.2", features = ["module", "luajit"] }
+lazy_static = "1.5.0"

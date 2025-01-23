@@ -10,8 +10,6 @@ self.pbuf = vim.api.nvim_create_buf(false, true)
 -- vim.bo[self.qbuf].buftype = "prompt"
 
 function self.close()
-  print("trying to close")
-  vim.print({ self.rwin, self.qwin, self.pwin })
   self.is_closed = true
   for _, win in pairs({ self.rwin, self.qwin, self.pwin }) do
     if vim.api.nvim_win_is_valid(win) then
@@ -34,9 +32,9 @@ function self.render(picker)
 
   self.ns_id = vim.api.nvim_create_namespace("MyNamespace")
   local rwin_size = vim.api.nvim_win_get_height(self.rwin)
-  local values = picker.matcher:matched_items(0, picker.selected + rwin_size)
-  local total = picker.matcher:item_count()
-  local matched = picker.matcher:matched_item_count()
+  local values = picker.matcher.matched_items(0, picker.selected + rwin_size)
+  local total = picker.matcher.item_count()
+  local matched = picker.matcher.matched_item_count()
 
   if mark_id then
     vim.api.nvim_buf_del_extmark(self.qbuf, ns_id, mark_id)

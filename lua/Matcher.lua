@@ -1,27 +1,21 @@
 ---@class Matcher
-local Matcher = {}
+local self = {}
 
 
--- without fuzzy finding yet
-function Matcher.new()
-  ---@class Matcher
-  local self = setmetatable({}, { __index = Matcher })
-  self._all_items = {}
-  self._matched = {}
-  self.pattern = ""
-  return self
-end
+self._all_items = {}
+self._matched = {}
+self._pattern = ""
 
-function Matcher:add_items(items)
+function self.add_items(items)
   for _, val in ipairs(items) do
     table.insert(self._all_items, val)
-    if string.find(val, self.pattern) then
+    if string.find(val, self._pattern) then
       table.insert(self._matched, val)
     end
   end
 end
 
-function Matcher:matched_items(left, right)
+function self.matched_items(left, right)
   local res = {}
   for i = left, right do
     table.insert(res, self._matched[i + 1])
@@ -29,21 +23,25 @@ function Matcher:matched_items(left, right)
   return res
 end
 
-function Matcher:matched_item_count()
+function self.matched_item_count()
   return #self._matched
 end
 
-function Matcher:item_count()
+function self.set_pattern(pattern)
+  self._pattern = pattern
+end
+
+function self.item_count()
   return #self._all_items
 end
 
-function Matcher:reparse()
+function self.reparse()
   self._matched = {}
   for _, val in ipairs(self._all_items) do
-    if string.find(val, self.pattern) then
+    if string.find(val, self._pattern) then
       table.insert(self._matched, val)
     end
   end
 end
 
-return Matcher
+return self

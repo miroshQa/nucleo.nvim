@@ -13,8 +13,8 @@ vim.api.nvim_create_autocmd("TextChangedI", {
       vim.schedule(function ()
         local active = state.last_picker
         local pattern = vim.trim(vim.api.nvim_get_current_line())
-        active.matcher.pattern = pattern
-        active.matcher:reparse()
+        active.matcher.set_pattern(pattern)
+        active.matcher.reparse()
         PickerView.render(active)
       end)
     end)
@@ -24,7 +24,7 @@ vim.api.nvim_create_autocmd("TextChangedI", {
 
 vim.keymap.set({ "i" }, "<down>", function()
   local active = state.last_picker
-  local items_available = active.matcher:matched_item_count()
+  local items_available = active.matcher.matched_item_count()
   if items_available == 0 then
     return
   end
@@ -37,7 +37,7 @@ end, { buffer = PickerView.qbuf })
 
 vim.keymap.set({ "i" }, "<up>", function()
   local active = state.last_picker
-  local items_available = active.matcher:matched_item_count()
+  local items_available = active.matcher.matched_item_count()
   if items_available == 0 then
     return
   end
