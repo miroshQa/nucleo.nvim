@@ -1,5 +1,6 @@
 local state = require("NucleoState")
 local PickerView = require("PickerView")
+local Matcher = require("nucleo_matcher")
 local timer = vim.uv.new_timer()
 
 vim.api.nvim_create_autocmd("TextChangedI", {
@@ -51,10 +52,12 @@ end, { buffer = PickerView.qbuf })
 vim.keymap.set({ "i" }, "<CR>", function()
   local active = state.last_picker
   local line = vim.api.nvim_buf_get_lines(PickerView.rbuf, active.selected, active.selected + 1, false)[1]
+  Matcher.restart()
   PickerView:close()
   vim.cmd("e " .. line)
 end, { buffer = PickerView.qbuf })
 
 vim.keymap.set({ "i", "n" }, "<esc>", function()
+  Matcher.restart()
   PickerView.close()
 end, { buffer = PickerView.qbuf })

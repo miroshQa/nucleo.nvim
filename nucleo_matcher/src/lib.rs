@@ -68,6 +68,13 @@ fn set_pattern(_: &Lua, pattern: String) -> LuaResult<()> {
     Ok(())
 }
 
+
+fn restart(_: &Lua, _: ()) -> LuaResult<()> {
+    let mut matcher = MATCHER.lock().unwrap();
+    matcher.restart(true);
+    Ok(())
+}
+
 #[mlua::lua_module(skip_memory_check)]
 fn nucleo_matcher(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
@@ -76,6 +83,7 @@ fn nucleo_matcher(lua: &Lua) -> LuaResult<LuaTable> {
     exports.set("matched_item_count", lua.create_function(matched_item_count)?)?;
     exports.set("item_count", lua.create_function(item_count)?)?;
     exports.set("reparse", lua.create_function(reparse)?)?;
+    exports.set("restart", lua.create_function(restart)?)?;
     exports.set("set_pattern", lua.create_function(set_pattern)?)?;
     Ok(exports)
 }
