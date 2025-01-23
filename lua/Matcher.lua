@@ -15,7 +15,7 @@ end
 
 function Matcher:matched_items(left, right)
   return vim.iter(self._items):map(function (x)
-    if x.score > 0 then
+    if x.score > 0 and x.data ~= "" then
       return x.data
     end
   end):totable()
@@ -24,7 +24,7 @@ end
 function Matcher:matched_item_count()
   local total = 0
   for _, val in ipairs(self._items) do
-    if val.score > 0 then
+    if val.score > 0 and val.data ~= 0 then
       total = total + 1
     end
   end

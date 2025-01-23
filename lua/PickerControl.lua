@@ -19,6 +19,9 @@ vim.keymap.set({ "i" }, "<down>", function()
     return
   end
   active.selected = math.min(active.selected + 1, items_available - 1)
+  vim.api.nvim_buf_call(PickerView.rbuf, function()
+    vim.cmd("norm! j")
+  end)
   PickerView.render(active)
 end, { buffer = PickerView.qbuf })
 
@@ -28,6 +31,9 @@ vim.keymap.set({ "i" }, "<up>", function()
   if items_available == 0 then
     return
   end
+  vim.api.nvim_buf_call(PickerView.rbuf, function()
+    vim.cmd("norm! k")
+  end)
   active.selected = math.max(active.selected - 1, 0)
   PickerView.render(active)
 end, { buffer = PickerView.qbuf })

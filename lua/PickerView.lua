@@ -33,9 +33,7 @@ function self.render(picker)
   -- NOTE: Should add only line highlight on <down> and <up>
   vim.schedule(function()
     vim.api.nvim_buf_set_lines(self.rbuf, 0, -1, false, values)
-    vim.api.nvim_buf_clear_namespace(self.rbuf, self.ns_id, 0, -1)
     if #values > 0 then
-      vim.api.nvim_buf_add_highlight(self.rbuf, self.ns_id, "Cursor", picker.selected, 0, -1)
       local line = vim.api.nvim_buf_get_lines(self.rbuf, picker.selected, picker.selected + 1, false)[1]
       local ok, file = pcall(io.open, line, "r")
       if ok then
@@ -100,7 +98,13 @@ function self._instantiate_windows()
     height = preview_win_height,
     border = "rounded",
   })
-  vim.print({ self.rwin, self.qwin, self.pwin })
+
+  -- for _, win in ipairs({self.qwin, self.rwin, self.pwin}) do
+  --   vim.wo[win].number = false
+  --   vim.wo[win].relativenumber = false
+  -- end
+
+  vim.wo[self.rwin].cursorline = true
 end
 
 return self
