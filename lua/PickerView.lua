@@ -4,9 +4,9 @@
 local self = {}
 
 self.is_closed = true
-self.qbuf = vim.api.nvim_create_buf(false, false)
-self.rbuf = vim.api.nvim_create_buf(false, false)
-self.pbuf = vim.api.nvim_create_buf(false, false)
+self.qbuf = vim.api.nvim_create_buf(false, true)
+self.rbuf = vim.api.nvim_create_buf(false, true)
+self.pbuf = vim.api.nvim_create_buf(false, true)
 
 
 function self.close()
