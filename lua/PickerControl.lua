@@ -4,9 +4,11 @@ local PickerView = require("PickerView")
 vim.api.nvim_create_autocmd("TextChangedI", {
   group = vim.api.nvim_create_augroup("UpdateResultsOnQueryChange", { clear = true }),
   callback = function()
+    print("query changed" .. os.time())
     local active = state.last_picker
     local pattern = vim.trim(vim.api.nvim_get_current_line())
-    active:process_query(pattern)
+    active.matcher.pattern = pattern
+    active.matcher:reparse()
     PickerView.render(active)
   end,
   buffer = PickerView.qbuf,

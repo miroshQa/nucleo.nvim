@@ -22,11 +22,6 @@ function Picker.new(source, matcher)
   return self
 end
 
----@param query string
-function Picker:process_query(query)
-  self.matcher:reparse(query)
-end
-
 function Picker:move_selected(direction)
   if direction == "down" then
   else

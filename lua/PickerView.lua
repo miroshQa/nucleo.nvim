@@ -8,7 +8,6 @@ self.qbuf = vim.api.nvim_create_buf(false, true)
 self.rbuf = vim.api.nvim_create_buf(false, true)
 self.pbuf = vim.api.nvim_create_buf(false, true)
 
-
 function self.close()
   print("trying to close")
   vim.print({ self.rwin, self.qwin, self.pwin })
@@ -29,19 +28,19 @@ function self.render(picker)
   end
 
   self.ns_id = vim.api.nvim_create_namespace("MyNamespace")
-  local values = picker.matcher:matched_items()
-  -- NOTE: Should add only line highlight on <down> and <up>
+  local rwin_size = vim.api.nvim_win_get_height(self.rwin)
+  local values = picker.matcher:matched_items(0, picker.selected + rwin_size)
   vim.schedule(function()
     vim.api.nvim_buf_set_lines(self.rbuf, 0, -1, false, values)
-    if #values > 0 then
-      local line = vim.api.nvim_buf_get_lines(self.rbuf, picker.selected, picker.selected + 1, false)[1]
-      local ok, file = pcall(io.open, line, "r")
-      if ok then
-        local lines = vim.iter(file:lines()):totable()
-        vim.api.nvim_buf_set_lines(self.pbuf, 0, -1, false, lines)
-        vim.treesitter.start(self.pbuf, "lua")
-      end
-    end
+    -- if #values > 0 then
+    --   local line = vim.api.nvim_buf_get_lines(self.rbuf, picker.selected, picker.selected + 1, false)[1]
+    --   local ok, file = pcall(io.open, line, "r")
+    --   if ok then
+    --     local lines = vim.iter(file:lines()):totable()
+    --     vim.api.nvim_buf_set_lines(self.pbuf, 0, -1, false, lines)
+    --     vim.treesitter.start(self.pbuf, "lua")
+    --   end
+    -- end
   end)
   vim.cmd.startinsert()
 end
@@ -105,6 +104,7 @@ function self._instantiate_windows()
   -- end
 
   vim.wo[self.rwin].cursorline = true
+  vim.wo[self.rwin].wrap = false
 end
 
 return self
