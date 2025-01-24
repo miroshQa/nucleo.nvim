@@ -15,7 +15,10 @@ vim.api.nvim_create_autocmd("TextChangedI", {
         local active = state.last_picker
         local pattern = vim.trim(vim.api.nvim_get_current_line())
         active.matcher.set_pattern(pattern)
-        active.matcher.reparse()
+        local running =  active.matcher.reparse()
+        if running then
+          print("Matcher didn't complete fuzzy search in 20ms")
+        end
         PickerView.render(active)
       end)
     end)

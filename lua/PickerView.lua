@@ -35,6 +35,9 @@ function self.render(picker)
   self.ns_id = vim.api.nvim_create_namespace("MyNamespace")
   local rwin_size = vim.api.nvim_win_get_height(self.rwin)
   local values = picker.matcher.matched_items(0, picker.selected + rwin_size)
+  values = vim.iter(values):map(function (x)
+    return x.matchable
+  end):totable()
   local total = picker.matcher.item_count()
   local matched = picker.matcher.matched_item_count()
 

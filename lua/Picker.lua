@@ -16,7 +16,7 @@ function Picker.new(source, matcher)
     if not items then
       return
     end
-    self.matcher.add_items(items)
+    self.matcher.add_items_strings_tbl(items)
   end)
 
   return self
