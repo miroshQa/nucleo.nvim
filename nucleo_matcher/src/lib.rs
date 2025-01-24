@@ -68,10 +68,9 @@ fn matched_items(lua: &Lua, (left, right): (u32, u32)) -> mlua::Result<LuaTable>
 }
 
 // return true if matcher didn't complete parse
-fn reparse(lua: &Lua, _: ()) -> mlua::Result<bool> {
+fn tick(lua: &Lua, timeout: u64) -> mlua::Result<bool> {
     let mut matcher = MATCHER.lock().unwrap();
-    let status = matcher.tick(20);
-    Ok(status.running)
+    Ok(matcher.tick(timeout).running)
 }
 
 fn item_count(lua: &Lua, _: ()) -> mlua::Result<u32> {
@@ -115,7 +114,7 @@ fn nucleo_matcher(lua: &Lua) -> LuaResult<LuaTable> {
     exports.set("matched_items", lua.create_function(matched_items)?)?;
     exports.set("matched_item_count", lua.create_function(matched_item_count)?)?;
     exports.set("item_count", lua.create_function(item_count)?)?;
-    exports.set("reparse", lua.create_function(reparse)?)?;
+    exports.set("tick", lua.create_function(tick)?)?;
     exports.set("restart", lua.create_function(restart)?)?;
     exports.set("set_pattern", lua.create_function(set_pattern)?)?;
     Ok(exports)

@@ -1,27 +1,29 @@
 local state = require("NucleoState")
 local PickerView = require("PickerView")
 local Matcher = require("nucleo_matcher")
-local timer = vim.uv.new_timer()
+local does_await_update = false
+
+local function try_wait_and_update()
+  local active = state.last_picker
+  local running = active.matcher.tick(1)
+  if not running then
+    PickerView.render(active)
+    does_await_update = false
+  else
+    vim.schedule(try_wait_and_update)
+  end
+end
 
 vim.api.nvim_create_autocmd("TextChangedI", {
   group = vim.api.nvim_create_augroup("UpdateResultsOnQueryChange", { clear = true }),
   callback = function()
-    if timer:is_active() then
-      timer:stop()
+    if not does_await_update then
+      local active = state.last_picker
+      local pattern = vim.trim(vim.api.nvim_get_current_line())
+      active.matcher.set_pattern(pattern)
+      does_await_update = true
+      try_wait_and_update()
     end
-
-    timer:start(30, 0, function()
-      vim.schedule(function ()
-        local active = state.last_picker
-        local pattern = vim.trim(vim.api.nvim_get_current_line())
-        active.matcher.set_pattern(pattern)
-        local running =  active.matcher.reparse()
-        if running then
-          print("Matcher didn't complete fuzzy search in 20ms")
-        end
-        PickerView.render(active)
-      end)
-    end)
   end,
   buffer = PickerView.qbuf,
 })
