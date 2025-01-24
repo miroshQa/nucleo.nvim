@@ -1,9 +1,7 @@
 package.cpath = package.cpath .. ";./target/release/lib?.so"
 
--- require("nucleo_matcher").hello("value")
--- require("nucleo_matcher").print_table({"print table", "bye bye"})
 local matcher = require("nucleo_matcher")
-matcher.add_items({"miron", "aboba", "veron"})
+matcher.add_items({"test", "some value", "neovim"})
 print(matcher.item_count())
 matcher.set_pattern("o")
 matcher.reparse()

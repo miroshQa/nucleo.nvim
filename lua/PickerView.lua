@@ -7,6 +7,8 @@ self.is_closed = true
 self.qbuf = vim.api.nvim_create_buf(false, true)
 self.rbuf = vim.api.nvim_create_buf(false, true)
 self.pbuf = vim.api.nvim_create_buf(false, true)
+-- Not gonna use it to disable autocompletion; it seems like a legacy Vim feature that leads to
+-- some quirks such as the c-w command not working and probably many more
 -- vim.bo[self.qbuf].buftype = "prompt"
 
 function self.close()
@@ -51,10 +53,11 @@ function self.render(picker)
     if #values > 0 then
       local line = vim.api.nvim_buf_get_lines(self.rbuf, picker.selected, picker.selected + 1, false)[1]
       local ok, file = pcall(io.open, line, "r")
-      if ok then
+      local ft = vim.filetype.match({filename = line})
+      if ok and file then
         local lines = vim.iter(file:lines()):totable()
         vim.api.nvim_buf_set_lines(self.pbuf, 0, -1, false, lines)
-        vim.treesitter.start(self.pbuf, "lua")
+        pcall(vim.treesitter.start, self.pbuf, ft)
       end
     end
   end)
