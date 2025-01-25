@@ -1,3 +1,4 @@
+local matcher = require("nucleo_matcher")
 -- Singleton kind of. There is not reason to create multiple of it,
 -- because we want set keymaps for buffer only once as well as create them (only on startup)
 ---@class PickerView
@@ -34,12 +35,12 @@ function self.render(picker)
 
   self.ns_id = vim.api.nvim_create_namespace("MyNamespace")
   local rwin_size = vim.api.nvim_win_get_height(self.rwin)
-  local values = picker.matcher.matched_items(0, picker.selected + rwin_size)
+  local values = matcher.matched_items(0, picker.selected + rwin_size)
   values = vim.iter(values):map(function (x)
     return x.matchable
   end):totable()
-  local total = picker.matcher.item_count()
-  local matched = picker.matcher.matched_item_count()
+  local total = matcher.item_count()
+  local matched = matcher.matched_item_count()
 
   if mark_id then
     vim.api.nvim_buf_del_extmark(self.qbuf, ns_id, mark_id)
@@ -52,6 +53,7 @@ function self.render(picker)
   })
 
   vim.schedule(function()
+    -- print("redrawed" .. vim.uv.hrtime())
     vim.api.nvim_buf_set_lines(self.rbuf, 0, -1, false, values)
     if #values > 0 then
       local line = vim.api.nvim_buf_get_lines(self.rbuf, picker.selected, picker.selected + 1, false)[1]

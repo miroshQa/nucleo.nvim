@@ -1,6 +1,32 @@
+--- Items Source Interface
+--- The responsibility of this entity is to start streaming items into the matcher upon the start call.
+--- You can pass some config options when creating new instance (that how you would be do in static typed languages, 
+--- but since each source is global and lua is dynamic typed language you
+--- should just pass options through some .opts field, each source can define it own opts structure)
+---@class Nucleo.Source
+---@field start fun(on_exit: fun())
+---@field stop fun()
 
----@class PickerItem
----@field score number
+--- Matcher Interface
+--- Currently (and probably always), we only have the Helix Nucleo matcher written in Rust;
+--- there is no matcher written in Lua (like the native matcher without dependency, but slow).
+--- Also, this is kind of a single global object for the whole plugin (we can't create a few instances of it).
+--- Probably someone will say it is bad, but I honestly don't see any reason why we would want
+--- to create and run a few of them at the same time unless we want to kill memory.
+--- So the only "drawback" of this approach I see is that we can restore only the last run picker,
+--- but that is not a drawback at all; the previous one is more than enough.
+--- We don't want to store many of them and clutter memory.
+--- Any Nucleo.Source is also a single global object for the same reason.
+---@class Nucleo.Matcher
+---@field add_item fun(item: Nucleo.Matcher.Item) Adds an item with additional data (some serialized lua table as string)
+---@field add_item_string fun(matchable: string) Adds an item without additional data
+---@field matched_items fun(left: number, right: number): Nucleo.Matcher.Item[]
+---@field tick fun(timeout: number): boolean Return true if matcher still running
+---@field item_count fun(): number Returns the amount of items added to memory.
+---@field matched_item_count fun(): number Returns the amount of items matching the pattern.
+---@field set_pattern fun(): nil Sets the pattern
+---@field restart fun(): nil Removes all items added to memory.
+
+---@class Nucleo.Matcher.Item
+---@field matchable string
 ---@field data string
-
----@class Source

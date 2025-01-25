@@ -6,14 +6,10 @@ package.cpath = package.cpath .. ";" .. libpath
 require("PickerControl")
 local Picker = require("Picker")
 local PickerView = require("PickerView")
-local Matcher = require("Matcher")
-Matcher = require("nucleo_matcher")
-local FilesSource = require("FilesSource")
 local state = require("NucleoState")
 
 function M.files()
-  local source = FilesSource.new()
-  state.last_picker = Picker.new(source, Matcher)
+  state.last_picker = Picker.new(nil, nil)
   PickerView.clear()
   PickerView.render(state.last_picker)
 end

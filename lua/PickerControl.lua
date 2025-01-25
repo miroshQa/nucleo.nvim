@@ -1,6 +1,8 @@
 local state = require("NucleoState")
 local PickerView = require("PickerView")
-local Matcher = require("nucleo_matcher")
+---@type Nucleo.Matcher
+local matcher = require("nucleo_matcher")
+print(vim.matcher)
 
 local last_tick_time = nil
 
@@ -11,7 +13,7 @@ vim.api.nvim_create_autocmd("TextChangedI", {
     if not last_tick_time or now - last_tick_time > 50 then
       local active = state.last_picker
       local pattern = vim.trim(vim.api.nvim_get_current_line())
-      active.matcher.set_pattern(pattern)
+      matcher.set_pattern(pattern)
       last_tick_time = now
     end
   end,
@@ -20,7 +22,7 @@ vim.api.nvim_create_autocmd("TextChangedI", {
 
 vim.keymap.set({ "i" }, "<down>", function()
   local active = state.last_picker
-  local items_available = active.matcher.matched_item_count()
+  local items_available = matcher.matched_item_count()
   if items_available == 0 then
     return
   end
@@ -33,7 +35,7 @@ end, { buffer = PickerView.qbuf })
 
 vim.keymap.set({ "i" }, "<up>", function()
   local active = state.last_picker
-  local items_available = active.matcher.matched_item_count()
+  local items_available = matcher.matched_item_count()
   if items_available == 0 then
     return
   end
@@ -47,7 +49,7 @@ end, { buffer = PickerView.qbuf })
 vim.keymap.set({ "i" }, "<CR>", function()
   local active = state.last_picker
   local line = vim.api.nvim_buf_get_lines(PickerView.rbuf, active.selected, active.selected + 1, false)[1]
-  Matcher.restart()
+  matcher.restart()
   PickerView:close()
   active.timer:stop()
   vim.cmd("e " .. line)
@@ -55,7 +57,7 @@ end, { buffer = PickerView.qbuf })
 
 vim.keymap.set({ "i", "n" }, "<esc>", function()
   local active = state.last_picker
-  Matcher.restart()
+  matcher.restart()
   PickerView.close()
   active.timer:stop()
 end, { buffer = PickerView.qbuf })
