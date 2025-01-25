@@ -2,7 +2,8 @@ local state = require("NucleoState")
 local PickerView = require("PickerView")
 ---@type Nucleo.Matcher
 local matcher = require("nucleo_matcher")
-print(vim.matcher)
+local source = require("sources.files")
+local layout = require("layouts").default
 
 local last_tick_time = nil
 
@@ -50,14 +51,15 @@ vim.keymap.set({ "i" }, "<CR>", function()
   local active = state.last_picker
   local line = vim.api.nvim_buf_get_lines(PickerView.rbuf, active.selected, active.selected + 1, false)[1]
   matcher.restart()
-  PickerView:close()
+  layout:close()
   active.timer:stop()
   vim.cmd("e " .. line)
 end, { buffer = PickerView.qbuf })
 
 vim.keymap.set({ "i", "n" }, "<esc>", function()
   local active = state.last_picker
+  source.stop()
   matcher.restart()
-  PickerView.close()
+  layout:close()
   active.timer:stop()
 end, { buffer = PickerView.qbuf })
