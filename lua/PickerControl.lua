@@ -1,6 +1,6 @@
 local state = require("NucleoState")
 local PickerView = require("PickerView")
----@type Nucleo.Matcher
+---@type nucleo.Matcher
 local matcher = require("nucleo_matcher")
 local source = require("sources.files")
 local layout = require("layouts").default

@@ -1,4 +1,4 @@
----@type Nucleo.Source
+---@type nucleo.Source
 -- Why does this shit keep complain? I guess I declare annotations wrong. Need to study it
 local files = {}
 local is_running = false

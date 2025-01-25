@@ -1,5 +1,6 @@
 local matcher = require("nucleo_matcher")
 local layout = require("layouts").default
+local previewer = require("previewers.file")
 -- Singleton kind of. There is not reason to create multiple of it,
 -- because we want set keymaps for buffer only once as well as create them (only on startup)
 ---@class PickerView
@@ -47,17 +48,7 @@ function self.render(picker)
     vim.api.nvim_buf_set_lines(self.rbuf, 0, -1, false, values)
     if #values > 0 then
       local line = vim.api.nvim_buf_get_lines(self.rbuf, picker.selected, picker.selected + 1, false)[1]
-      local stat = vim.uv.fs_stat(line)
-      if not stat or stat.type == "directory" then
-        return
-      end
-      local ok, file = pcall(io.open, line, "r")
-      local ft = vim.filetype.match({ filename = line })
-      if ok and file then
-        local lines = vim.iter(file:lines()):totable()
-        vim.api.nvim_buf_set_lines(self.pbuf, 0, -1, false, lines)
-        pcall(vim.treesitter.start, self.pbuf, ft)
-      end
+      previewer.preview(self.pbuf, line)
     end
   end)
 end
