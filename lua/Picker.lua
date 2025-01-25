@@ -1,3 +1,5 @@
+local view = require("PickerView")
+
 ---@class Picker
 local Picker = {}
 
@@ -17,7 +19,6 @@ function Picker.new(source, matcher)
     package.cpath = package.cpath .. ";" .. libpath
 
     local matcher = require("nucleo_matcher")
-    local should_live = true
     local stdout = vim.uv.new_pipe(false)
     local handle
 
@@ -34,18 +35,28 @@ function Picker.new(source, matcher)
       if not data then
         return
       else
-        matcher.add_items_strings_tbl(vim.split(data, "\n"))
+        for _, value in ipairs(vim.split(data, "\n")) do
+          matcher.add_item_string(value)
+        end
       end
     end)
 
     vim.uv.run("default")
-
   end
+
+  self.timer = vim.uv.new_timer()
+  self.timer:start(30, 30, function()
+    vim.schedule(function ()
+      matcher.tick(10)
+      view.render(self)
+    end)
+  end)
 
   local work = vim.uv.new_work(work_callback, function (...)
     print("work exit")
   end)
   work:queue()
+
 
   return self
 end

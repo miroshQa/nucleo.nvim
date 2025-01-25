@@ -1,28 +1,18 @@
 local state = require("NucleoState")
 local PickerView = require("PickerView")
 local Matcher = require("nucleo_matcher")
-local does_await_update = false
 
-local function try_wait_and_update()
-  local active = state.last_picker
-  local running = active.matcher.tick(1)
-  if not running then
-    PickerView.render(active)
-    does_await_update = false
-  else
-    vim.schedule(try_wait_and_update)
-  end
-end
+local last_tick_time = nil
 
 vim.api.nvim_create_autocmd("TextChangedI", {
   group = vim.api.nvim_create_augroup("UpdateResultsOnQueryChange", { clear = true }),
   callback = function()
-    if not does_await_update then
+    local now = vim.uv.now()
+    if not last_tick_time or now - last_tick_time > 50 then
       local active = state.last_picker
       local pattern = vim.trim(vim.api.nvim_get_current_line())
       active.matcher.set_pattern(pattern)
-      does_await_update = true
-      try_wait_and_update()
+      last_tick_time = now
     end
   end,
   buffer = PickerView.qbuf,
@@ -59,10 +49,13 @@ vim.keymap.set({ "i" }, "<CR>", function()
   local line = vim.api.nvim_buf_get_lines(PickerView.rbuf, active.selected, active.selected + 1, false)[1]
   Matcher.restart()
   PickerView:close()
+  active.timer:stop()
   vim.cmd("e " .. line)
 end, { buffer = PickerView.qbuf })
 
 vim.keymap.set({ "i", "n" }, "<esc>", function()
+  local active = state.last_picker
   Matcher.restart()
   PickerView.close()
+  active.timer:stop()
 end, { buffer = PickerView.qbuf })

@@ -13,39 +13,31 @@ struct MatcherItem {
     data: String,
 }
 
-// OMG, I HATE RUST, I DON'T FUCKING KNOW HOW TO AVOID THIS BULLSHIG, IT SEEMS THE ONLY WAY TO
-// DEFINE FUCKING file scope level VARIABLE in this idiotic language OMGMGMGMGMGMGMGMG
+// Hmmm... Is it possible to define it easier?
 lazy_static! {
     static ref MATCHER: Arc<Mutex<Nucleo<MatcherItem>>> = Arc::new(Mutex::new(Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1)));
 }
 
-fn add_items(lua: &Lua, table: Table) -> mlua::Result<()> {
+fn add_item(lua: &Lua, tbl: Table) -> mlua::Result<()> {
     let matcher = MATCHER.lock().unwrap();
     // that is pretty damn inefficient I guess
     let injector = matcher.injector();
-    for tbl in table.sequence_values::<LuaTable>() {
-        let tbl = tbl.unwrap();
-        let matchable: String = tbl.raw_get("matchable")?;
-        let data: String = tbl.raw_get("data")?;
-        let item = MatcherItem { matchable, data };
-        injector.push(item, |item, row| {
-            row[0] = item.matchable.clone().into();
-        });
-    }
+    let matchable: String = tbl.raw_get("matchable")?;
+    let data: String = tbl.raw_get("data")?;
+    let item = MatcherItem { matchable, data };
+    injector.push(item, |item, row| {
+        row[0] = item.matchable.clone().into();
+    });
     Ok(())
 }
 
-fn add_items_strings_tbl(lua: &Lua, table: Table) -> mlua::Result<()> {
+fn add_item_string(lua: &Lua, str: String) -> mlua::Result<()> {
     let matcher = MATCHER.lock().unwrap();
-    // that is pretty damn inefficient I guess
     let injector = matcher.injector();
-    for str in table.sequence_values::<String>() {
-        let value = str.unwrap();
-        let item = MatcherItem { matchable: value, data: String::new() };
-        injector.push(item, |item, row| {
-            row[0] = item.matchable.clone().into();
-        });
-    }
+    let item = MatcherItem { matchable: str, data: String::new() };
+    injector.push(item, |item, row| {
+        row[0] = item.matchable.clone().into();
+    });
     Ok(())
 }
 
@@ -106,14 +98,13 @@ fn restart(_: &Lua, _: ()) -> LuaResult<()> {
 #[mlua::lua_module(skip_memory_check)]
 fn nucleo_matcher(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
-    exports.set("add_items", lua.create_function(add_items)?)?;
-    exports.set("add_items_strings_tbl", lua.create_function(add_items_strings_tbl)?)?;
-    // exports.set("add_items_split_string", lua.create_function(add_string_items)?)?;
+    exports.set("add_item", lua.create_function(add_item)?)?;
+    exports.set("add_item_string", lua.create_function(add_item_string)?)?;
     // Also I probably should add function matched_items_matchable that will return only tbl of
     // strings
-    exports.set("matched_items", lua.create_function(matched_items)?)?;
-    exports.set("matched_item_count", lua.create_function(matched_item_count)?)?;
     exports.set("item_count", lua.create_function(item_count)?)?;
+    exports.set("matched_item_count", lua.create_function(matched_item_count)?)?;
+    exports.set("matched_items", lua.create_function(matched_items)?)?;
     exports.set("tick", lua.create_function(tick)?)?;
     exports.set("restart", lua.create_function(restart)?)?;
     exports.set("set_pattern", lua.create_function(set_pattern)?)?;
