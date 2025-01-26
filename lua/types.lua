@@ -3,9 +3,9 @@
 --- You can pass some config options when creating new instance (that how you would be do in static typed languages, 
 --- but since each source is global and lua is dynamic typed language you
 --- should just pass options through some .opts field, each source can define it own opts structure)
----@class Nucleo.Source
----@field start fun(on_exit: fun())
----@field stop fun()
+--@class nucleo.Source
+--@field start fun(on_exit: fun())
+--@field stop fun()
 
 --- Matcher Interface
 --- Currently (and probably always), we only have the Helix Nucleo matcher written in Rust;
@@ -17,11 +17,22 @@
 --- but that is not a drawback at all; the previous one is more than enough.
 --- We don't want to store many of them and clutter memory.
 --- Any Nucleo.Source is also a single global object for the same reason.
----@class Nucleo.Matcher
+---@class nucleo.Matcher
 ---@field add_item fun(matchable: string, data: string) data - (some serialized lua table as string)
----@field matched_items fun(left: number, right: number): table Return lua table. First value is matchable second is data. Third is indices to higlight matchable
+---@field matched_items fun(left: number, right: number): table Return lua tables. First value is matchable second is data. Third is indices to higlight matchable
+---@field get_matched_item fun(index: number): table Return lua table. First value is matchable second is data.
 ---@field tick fun(timeout: number): boolean Return true if matcher still running
 ---@field item_count fun(): number Returns the amount of items added to memory.
 ---@field matched_item_count fun(): number Returns the amount of items matching the pattern.
----@field set_pattern fun(): nil Sets the pattern
+---@field set_pattern fun(pattern: string): nil Sets the pattern
 ---@field restart fun(): nil Removes all items added to memory.
+
+---@alias nucleo.picker.action fun(picker: nucleo.Picker)
+---@alias nucleo.picker.mapings table<string, table<string, nucleo.picker.action>>
+
+---@class nucleo.picker.spec
+---@field source nucleo.Source
+---@field matcher nucleo.Matcher
+---@field layout nucleo.Layout
+---@field previewer nucleo.Previewer
+---@field mappings nucleo.picker.mapings

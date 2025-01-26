@@ -1,33 +1,56 @@
-local view = require("PickerView")
-local matcher = require("nucleo_matcher")
+local Renderer = require("Renderer")
+local query = require("query")
+local prompt = require("prompt")
+local previewer = require("previewer")
 
----@class Picker
+local M = {}
+
+---@class nucleo.Picker
 local Picker = {}
 
----comment
----@return Picker
----@param source Source
----@param matcher Matcher
-function Picker.new()
-  ---@class Picker
+---Create new picker
+---@param spec nucleo.picker.spec
+function M.new(spec)
+  ---@class nucleo.Picker
   local self = setmetatable({}, { __index = Picker })
-  self.selected = 0 -- 0 means selected first item
+  self.source = spec.source
+  self.matcher = spec.matcher
+  self.layout = spec.layout
+  self.renderer = Renderer.new(self)
+  self.query = query.new(self)
+  self.prompt = prompt.new(picker)
+  self.previewer = previewer.new()
+  -- self.formatter = formatter
 
-  local source = require("sources.files")
-  source.start(function ()
-    print("source exited")
-  end)
-
-  self.timer = vim.uv.new_timer()
-  self.timer:start(30, 30, function()
-    vim.schedule(function ()
-      matcher.tick(10)
-      view.render(self)
-    end)
-  end)
+  for mode, mappings_tbl in pairs(spec.mappings) do
+    for key, action in pairs(mappings_tbl) do
+      vim.keymap.set(mode, key, function()
+        action(self)
+      end, {buffer = self.query.buf})
+    end
+  end
 
 
   return self
 end
 
-return Picker
+function Picker:run()
+  self.layout:open(self)
+  self.source:start(function()
+    -- self.renderer:stop()
+    -- self.renderer:render()
+  end)
+  self.renderer:start()
+end
+
+--- Release memory. It is aboslutely necessary to call this method 
+--- If you don't want to leak your memory. Because all other data
+--- Can be garbage collected only after we delete buffers
+function Picker:destroy()
+  self.source:stop()
+  self.query:destroy()
+  self.prompt:destroy()
+  self.previewer:destroy()
+end
+
+return M

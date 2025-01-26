@@ -1,4 +1,4 @@
----@class nucleo.previewer
+---@class nucleo.Previewer
 local previewer = {}
 
 function previewer.preview(pbuf, entry)

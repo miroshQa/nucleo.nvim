@@ -1,0 +1,29 @@
+-- local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "../target/release/lib?.so"
+-- local common_actions = require("sources.common_actions")
+-- local files = require("sources.files")
+--
+-- package.cpath = package.cpath .. ";" .. libpath
+-- local default_layout = require("layouts.default").new()
+--
+-- ---@class nucleo.config
+-- local config = {
+--   ---@type table<string, nucleo.picker.spec>
+--   pickers = {
+--
+--     find_files = {
+--       layout = default_layout,
+--       source = require("sources.files"),
+--       matcher = require("nucleo_matcher"),
+--       previewer = require("previewers.file"),
+--       mappings = {
+--         i = {
+--           ["<CR>"] = files.actions.select_entry,
+--         }
+--       }
+--     },
+--   },
+--
+-- }
+--
+-- return config
+return {}

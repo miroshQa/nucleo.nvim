@@ -1,23 +1,32 @@
----@type nucleo.layout
+local M = {}
+
+---@class nucleo.Layout
 local layout = {}
 
-function layout.new()
+--- Some layout options here (width, height)
+function M.new()
+---@class nucleo.Layout
   local self = setmetatable({}, { __index = layout })
-  self.is_closed = true
+  self.is_open = false
   return self
 end
 
+function layout:clone()
+  return M.new()
+end
+
 function layout:close()
-  for _, win in pairs({ self.rwin, self.qwin, self.pwin }) do
+  for _, win in pairs({ self.prompt_win, self.previewer_win, self.query_win }) do
     if vim.api.nvim_win_is_valid(win) then
       vim.api.nvim_win_close(win, true)
     end
   end
   vim.cmd.stopinsert()
-  self.is_closed = true
+  self.is_open = false
 end
 
-function layout:open(ctx)
+---@param picker nucleo.Picker
+function layout:open(picker)
   local width = vim.o.columns
   local height = vim.o.lines
 
@@ -36,7 +45,7 @@ function layout:open(ctx)
   local preview_column_shift = column_shift_to_center + results_and_query_win_width + gap_size
   local preview_win_width = math.floor(width * 0.4)
   local preview_win_height = results_win_height + query_win_height + gap_size
-  self.qwin = vim.api.nvim_open_win(ctx.qbuf, true, {
+  self.query_win = vim.api.nvim_open_win(picker.query.buf, true, {
     relative = 'editor',
     row = query_row_start,
     col = column_shift_to_center,
@@ -45,7 +54,7 @@ function layout:open(ctx)
     border = "rounded",
   })
 
-  self.rwin = vim.api.nvim_open_win(ctx.rbuf, false, {
+  self.prompt_win = vim.api.nvim_open_win(picker.prompt.buf, false, {
     relative = 'editor',
     row = results_row_start,
     col = column_shift_to_center,
@@ -54,7 +63,7 @@ function layout:open(ctx)
     border = "rounded",
   })
 
-  self.pwin = vim.api.nvim_open_win(ctx.pbuf, false, {
+  self.previewer_win = vim.api.nvim_open_win(picker.previewer.buf, false, {
     relative = 'editor',
     row = query_row_start,
     col = preview_column_shift,
@@ -63,14 +72,10 @@ function layout:open(ctx)
     border = "rounded",
   })
 
-  -- for _, win in ipairs({opts.qwin, self.rwin, self.pwin}) do
-  --   vim.wo[win].number = false
-  --   vim.wo[win].relativenumber = false
-  -- end
-
-  vim.wo[self.rwin].cursorline = true
-  vim.wo[self.rwin].wrap = false
-  self.is_closed = false
+  vim.wo[self.prompt_win].cursorline = true
+  vim.wo[self.prompt_win].wrap = false
+  self.is_open = true
+  vim.cmd.startinsert()
 end
 
-return layout
+return M

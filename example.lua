@@ -1,4 +1,3 @@
-
 package.cpath = package.cpath .. ";./target/release/lib?.so"
 
 local matcher = require("nucleo_matcher")
