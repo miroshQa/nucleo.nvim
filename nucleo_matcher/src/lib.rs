@@ -57,6 +57,16 @@ fn matched_items(lua: &Lua, (left, right): (u32, u32)) -> mlua::Result<LuaTable>
     Ok(res_tbl)
 }
 
+fn get_matched_item(lua: &Lua, index: u32) -> mlua::Result<LuaTable> {
+    let matcher = MATCHER.lock().unwrap();
+    let tbl = lua.create_table()?;
+    let snapshot = matcher.snapshot();
+    let item = snapshot.get_matched_item(index).unwrap();
+    tbl.raw_push(item.data.matchable.clone())?;
+    tbl.raw_push(item.data.data.clone())?;
+    Ok(tbl)
+}
+
 // return true if matcher didn't complete parse
 fn tick(_: &Lua, timeout: u64) -> mlua::Result<bool> {
     let mut matcher = MATCHER.lock().unwrap();
@@ -100,6 +110,7 @@ fn nucleo_matcher(lua: &Lua) -> LuaResult<LuaTable> {
     exports.set("item_count", lua.create_function(item_count)?)?;
     exports.set("matched_item_count", lua.create_function(matched_item_count)?)?;
     exports.set("matched_items", lua.create_function(matched_items)?)?;
+    exports.set("get_matched_item", lua.create_function(get_matched_item)?)?;
     exports.set("tick", lua.create_function(tick)?)?;
     exports.set("restart", lua.create_function(restart)?)?;
     exports.set("set_pattern", lua.create_function(set_pattern)?)?;
