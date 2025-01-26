@@ -34,7 +34,7 @@ local function start_stream(read_fds)
         if should_stop then
           break
         end
-        matcher.add_item_string(value)
+        matcher.add_item(value, "")
       end
     end
   end)

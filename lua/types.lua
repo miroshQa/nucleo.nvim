@@ -18,15 +18,10 @@
 --- We don't want to store many of them and clutter memory.
 --- Any Nucleo.Source is also a single global object for the same reason.
 ---@class Nucleo.Matcher
----@field add_item fun(item: Nucleo.Matcher.Item) Adds an item with additional data (some serialized lua table as string)
----@field add_item_string fun(matchable: string) Adds an item without additional data
----@field matched_items fun(left: number, right: number): Nucleo.Matcher.Item[]
+---@field add_item fun(matchable: string, data: string) data - (some serialized lua table as string)
+---@field matched_items fun(left: number, right: number): table Return lua table. First value is matchable second is data
 ---@field tick fun(timeout: number): boolean Return true if matcher still running
 ---@field item_count fun(): number Returns the amount of items added to memory.
 ---@field matched_item_count fun(): number Returns the amount of items matching the pattern.
 ---@field set_pattern fun(): nil Sets the pattern
 ---@field restart fun(): nil Removes all items added to memory.
-
----@class Nucleo.Matcher.Item
----@field matchable string
----@field data string

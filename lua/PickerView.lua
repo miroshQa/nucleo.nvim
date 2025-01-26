@@ -1,3 +1,4 @@
+---@type Nucleo.Matcher
 local matcher = require("nucleo_matcher")
 local layout = require("layouts").default
 local previewer = require("previewers.file")
@@ -28,7 +29,7 @@ function self.render(picker)
   local rwin_size = vim.api.nvim_win_get_height(layout.rwin)
   local values = matcher.matched_items(0, picker.selected + rwin_size)
   values = vim.iter(values):map(function(x)
-    return x.matchable
+    return x[1]
   end):totable()
   local total = matcher.item_count()
   local matched = matcher.matched_item_count()
