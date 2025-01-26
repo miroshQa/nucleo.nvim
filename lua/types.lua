@@ -19,7 +19,7 @@
 --- Any Nucleo.Source is also a single global object for the same reason.
 ---@class Nucleo.Matcher
 ---@field add_item fun(matchable: string, data: string) data - (some serialized lua table as string)
----@field matched_items fun(left: number, right: number): table Return lua table. First value is matchable second is data
+---@field matched_items fun(left: number, right: number): table Return lua table. First value is matchable second is data. Third is indices to higlight matchable
 ---@field tick fun(timeout: number): boolean Return true if matcher still running
 ---@field item_count fun(): number Returns the amount of items added to memory.
 ---@field matched_item_count fun(): number Returns the amount of items matching the pattern.

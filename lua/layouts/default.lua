@@ -70,7 +70,6 @@ function layout:open(ctx)
 
   vim.wo[self.rwin].cursorline = true
   vim.wo[self.rwin].wrap = false
-  vim.print({ self.rwin, self.qwin, self.pwin })
   self.is_closed = false
 end
 
