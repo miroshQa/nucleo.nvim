@@ -10,7 +10,7 @@
 ```lua
 {
   "miroshQa/nucleo.nvim",
-  build = "cd nucleo_matcher ; cargo build --release",
+  build = "cargo build --release",
   config = function()
     -- Some essential keymaps
     vim.keymap.set("n", "<leader>f", function() require("nucleo").files() end )

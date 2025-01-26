@@ -1,6 +1,6 @@
 local M = {}
 
-local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "../nucleo_matcher/target/release/lib?.so"
+local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "../target/release/lib?.so"
 package.cpath = package.cpath .. ";" .. libpath
 
 require("PickerControl")
