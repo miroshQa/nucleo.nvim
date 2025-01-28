@@ -7,20 +7,15 @@ function M.new()
 ---@class nucleo.Source
   local self = setmetatable({}, {__index = files})
   self.is_running = false
-  self.fds = nil
-  self.write_pipe = nil
-  self.start_time = nil
   return self
 end
 
 -- TODO: REALLY MESSY CODE, need to clean up
 
-local function start_stream(read_fds)
+local function start_stream()
   -- Should write some utils function for this horro
   local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "../../target/release/lib?.so"
   package.cpath = package.cpath .. ";" .. libpath
-  local read_pipe = vim.uv.new_pipe(false)
-  read_pipe:open(read_fds)
 
   local matcher = require("nucleo_matcher")
   local should_stop = false
@@ -28,7 +23,7 @@ local function start_stream(read_fds)
   local handle
 
   local function close_all_handles()
-    for _, handle in ipairs({ stdout, handle, read_pipe }) do
+    for _, handle in ipairs({ stdout, handle }) do
       if handle:is_active() then
         handle:close()
       end
@@ -44,23 +39,15 @@ local function start_stream(read_fds)
 
   vim.uv.read_start(stdout, function(err, data)
     assert(not err, err)
+    local status
     if data then
       for _, value in ipairs(vim.split(data, "\n")) do
-        if should_stop then
+        status = matcher.add_item(value, "")
+        if status == 1 then
+          close_all_handles()
           break
         end
-        matcher.add_item(value, "")
       end
-    end
-  end)
-
-  read_pipe:read_start(function(err, data)
-    if err then
-      print('Error reading from pipe:', err)
-    elseif data == "stop" then
-      print("Stop thread on demand")
-      should_stop = true
-      close_all_handles()
     end
   end)
 
@@ -68,9 +55,6 @@ local function start_stream(read_fds)
 end
 
 function files:start(on_exit)
-  self.fds = vim.uv.pipe({ nonblock = true }, { nonblock = true })
-  self.write_pipe = vim.uv.new_pipe(false)
-  self.write_pipe:open(self.fds.write)
   self.is_running = true
   self.start_time = vim.uv.now()
   local work = vim.uv.new_work(start_stream, function(...)
@@ -79,11 +63,10 @@ function files:start(on_exit)
     print("source took time: " .. finish_time)
     on_exit()
   end)
-  work:queue(self.fds.read)
+  work:queue()
 end
 
 function files:stop()
-  self.write_pipe:write("stop")
 end
 
 M.actions = {

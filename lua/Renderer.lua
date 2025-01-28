@@ -54,7 +54,7 @@ function renderer:render()
   local matchables = vim.iter(items):map(function(v) return v[1] end):totable()
 
   vim.schedule(function()
-    print("rendered " .. vim.uv.now())
+    -- print("rendered " .. vim.uv.now())
     vim.api.nvim_buf_clear_namespace(self.picker.prompt.buf, highlight.ns, 0, -1)
     vim.api.nvim_buf_set_lines(self.picker.prompt.buf, 0, -1, false, matchables)
     -- self.picker.previewer:display()

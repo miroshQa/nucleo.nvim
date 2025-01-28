@@ -17,9 +17,16 @@ struct MatcherItem {
 lazy_static! {
     static ref MATCHER: Arc<Mutex<Nucleo<MatcherItem>>> = Arc::new(Mutex::new(Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1)));
     static ref LOWLEVEL_MATCHER: Arc<Mutex<Matcher>> = Arc::new(Mutex::new(Matcher::new(Config::DEFAULT)));
+    static ref STATUS: Arc<Mutex<i32>> = Arc::new(Mutex::new(0));
 }
 
-fn add_item(_: &Lua, (matchable, data): (String, String)) -> mlua::Result<()> {
+fn set_status(_: &Lua, new_status: i32) -> mlua::Result<()> {
+    let mut status = STATUS.lock().unwrap();
+    *status = new_status;
+    Ok(())
+}
+
+fn add_item(_: &Lua, (matchable, data): (String, String)) -> mlua::Result<i32> {
     let matcher = MATCHER.lock().unwrap();
     // Hm, will it be faster if i start to reuse some static injector
     let injector = matcher.injector();
@@ -27,7 +34,8 @@ fn add_item(_: &Lua, (matchable, data): (String, String)) -> mlua::Result<()> {
     injector.push(item, |item, row| {
         row[0] = item.matchable.clone().into();
     });
-    Ok(())
+    let status = STATUS.lock().unwrap().clone();
+    Ok(status)
 }
 
 fn matched_items(lua: &Lua, (left, right): (u32, u32)) -> mlua::Result<LuaTable> {
@@ -99,7 +107,9 @@ fn set_pattern(_: &Lua, pattern: String) -> LuaResult<()> {
 
 fn restart(_: &Lua, _: ()) -> LuaResult<()> {
     let mut matcher = MATCHER.lock().unwrap();
-    matcher.restart(true);
+    matcher.restart(false);
+    let mut status = STATUS.lock().unwrap();
+    *status = 0;
     Ok(())
 }
 
@@ -107,6 +117,7 @@ fn restart(_: &Lua, _: ()) -> LuaResult<()> {
 fn nucleo_matcher(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
     exports.set("add_item", lua.create_function(add_item)?)?;
+    exports.set("set_status", lua.create_function(set_status)?)?;
     exports.set("item_count", lua.create_function(item_count)?)?;
     exports.set("matched_item_count", lua.create_function(matched_item_count)?)?;
     exports.set("matched_items", lua.create_function(matched_items)?)?;

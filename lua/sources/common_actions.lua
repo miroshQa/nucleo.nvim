@@ -12,9 +12,8 @@ local actions = {
     end)
   end,
   hide = function(picker)
-    print("try hide")
+    picker.matcher.set_status(1)
     picker.renderer:stop()
-    print("picker should be collected after layout:destroy()")
     picker.layout:close()
   end,
 }
