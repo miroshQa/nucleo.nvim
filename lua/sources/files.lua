@@ -37,10 +37,11 @@ local function start_stream()
 
   vim.uv.read_start(stdout, function(err, data)
     assert(not err, err)
+
     local status
     if data then
       for _, value in ipairs(vim.split(data, "\n")) do
-        status = matcher.add_item(value, vim.json.encode({filename = value}))
+        status = matcher.add_item(value, "")
         if status == 1 then
           close_all_handles()
           break
@@ -62,9 +63,6 @@ function files:start(matcher)
     -- on_exit()
   end)
   work:queue()
-end
-
-function files:stop()
 end
 
 M.actions = {

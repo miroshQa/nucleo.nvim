@@ -20,7 +20,6 @@ function M.new(spec)
   self.query = query.new(self)
   self.prompt = prompt.new(self)
   self.previewer = previewer.new(self)
-  -- self.formatter = formatter
 
   for mode, mappings_tbl in pairs(spec.mappings) do
     for key, action in pairs(mappings_tbl) do
@@ -30,13 +29,15 @@ function M.new(spec)
     end
   end
 
-
   return self
 end
 
 function Picker:run()
   self.layout:open(self)
-  self.source:start(self.matcher)
+  local start = vim.uv.now()
+  self.source:start(self.matcher, function()
+    print("source took ms: " ..  (vim.uv.now() - start)) 
+  end)
   self.renderer:start()
 end
 
@@ -44,7 +45,6 @@ end
 --- If you don't want to leak your memory. Because all other data
 --- Can be garbage collected only after we delete buffers
 function Picker:destroy()
-  self.source:stop()
   self.query:destroy()
   self.prompt:destroy()
   self.previewer:destroy()

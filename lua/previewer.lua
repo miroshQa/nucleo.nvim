@@ -10,6 +10,7 @@ function M.new(picker)
   local self = setmetatable({}, { __index = previewer })
   self.buf = vim.api.nvim_create_buf(false, true)
   self.picker = picker
+  -- self.formatter = nil
   return self
 end
 
@@ -20,7 +21,7 @@ end
 function previewer:update()
   -- specific code for find_files picker, need to abstract this stuff 
   local matched_items_count = self.picker.matcher.matched_item_count()
-  local cursor = vim.api.nvim_win_get_cursor(self.picker.layout.prompt_win)[1] or 0
+  local cursor = self.picker.prompt.selected
   if matched_items_count <= cursor then
     return
   end

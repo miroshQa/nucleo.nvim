@@ -13,6 +13,7 @@ M.pickers.default_mappings = {
     ["<down>"] = common_actions.down,
     ["<up>"] = common_actions.up,
     ["<esc>"] = common_actions.hide,
+    ["<CR>"] = common_actions.open,
     -- ["<C-d>"] = common_actions.preview_down,
     -- ["<C-u>"] = common_actions.preview_up,
     -- ["<C-q>"] = common_actions.send_all_to_quickfixlist,
@@ -24,7 +25,7 @@ M.pickers.default_mappings = {
 
 function M.find_files()
   matcher.restart()
-  local source = require("sources.files").new()
+  local source = require("sources.files_async").new()
   local layout = M.pickers.default_layout
   local picker = Picker.new({
     source = source,

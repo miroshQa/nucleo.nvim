@@ -16,7 +16,7 @@
   build = "cargo build --release",
   config = function()
     -- Some essential keymaps
-    vim.keymap.set("n", "<leader>f", function() require("nucleo").files() end )
+    vim.keymap.set("n", "<leader>f", function() require("nucleo").find_files() end )
     -- commented keymaps currently not implemented yet
     -- vim.keymap.set("n", "<leader>/", function() require("nucleo").live_grep() end )
     -- vim.keymap.set("n", "<leader>'", function() require("nucleo").last_picker() end )

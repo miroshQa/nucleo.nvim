@@ -32,6 +32,9 @@ end
 function renderer:render()
   vim.schedule(function()
     -- print("rendered " .. vim.uv.now())
+    if not self.picker.layout.is_open then
+      return
+    end
     self.picker.query:update()
     self.picker.prompt:update()
     self.picker.previewer:update()

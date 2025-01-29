@@ -1,6 +1,6 @@
 local M = {}
 
----@class 
+---@class
 local buffers = {}
 
 function M.new()
