@@ -1,11 +1,15 @@
 
 local M = {}
 
+---@class nucleo.Picker.Previewer
 local previewer = {}
 
-function M.new()
+---@param picker nucleo.Picker
+function M.new(picker)
+---@class nucleo.Picker.Previewer
   local self = setmetatable({}, { __index = previewer })
   self.buf = vim.api.nvim_create_buf(false, true)
+  self.picker = picker
   return self
 end
 
@@ -13,14 +17,25 @@ function previewer:destroy()
   vim.api.nvim_buf_delete(self.buf, {force = true})
 end
 
-function previewer:display(file_name)
-  local fd, err = vim.uv.fs_open(file_name, "r", 0)
-  if not fd then
-    return nil, err
-  end
-  local stats, err = vim.uv.fs_fstat(fd)
-  if not stats or stats.size > 1024 * 100 then
+function previewer:update()
+  -- specific code for find_files picker, need to abstract this stuff 
+  local matched_items_count = self.picker.matcher.matched_item_count()
+  local cursor = vim.api.nvim_win_get_cursor(self.picker.layout.prompt_win)[1] or 0
+  if matched_items_count <= cursor then
     return
+  end
+  local item = self.picker.matcher.get_matched_item(cursor)
+  local file_name = item[1]
+  local stat = vim.uv.fs_stat(file_name)
+  if not stat or stat.type == "directory" or stat.size > 100 * 1024 then
+    return
+  end
+  local ok, file = pcall(io.open, file_name, "r")
+  local ft = vim.filetype.match({ filename = file_name })
+  if ok and file then
+    local lines = vim.iter(file:lines()):totable()
+    vim.api.nvim_buf_set_lines(self.buf, 0, -1, false, lines)
+    pcall(vim.treesitter.start, self.buf, ft)
   end
 end
 

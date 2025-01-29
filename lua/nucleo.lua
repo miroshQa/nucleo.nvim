@@ -6,44 +6,60 @@ local config = require("config")
 local matcher = require("nucleo_matcher")
 local Picker = require("Picker")
 local M = {}
-
-local ClassicLayoutFabric = require("layouts.classic")
+M.pickers = {}
+M.pickers.default_layout = require("layouts.classic").new()
+M.pickers.default_mappings = {
+  i = {
+    ["<down>"] = common_actions.down,
+    ["<up>"] = common_actions.up,
+    ["<esc>"] = common_actions.hide,
+    -- ["<C-d>"] = common_actions.preview_down,
+    -- ["<C-u>"] = common_actions.preview_up,
+    -- ["<C-q>"] = common_actions.send_all_to_quickfixlist,
+    -- ["<CR>"] = common_actions.open_cur_buf,
+    -- ["<C-v>"] = common_actions.open_vsplit,
+    -- ["<C-s>"] = common_actions.open_split,
+  }
+}
 
 function M.find_files()
   matcher.restart()
   local source = require("sources.files").new()
-  local layout = require("layouts.classic").new()
-  local mappings = {
-    i = {
-      ["<down>"] = common_actions.down,
-      ["<up>"] = common_actions.up,
-      ["<esc>"] = common_actions.hide,
-      ["<CR>"] = require("sources.files").actions.select_entry,
-    }
-  }
-  local picker = Picker.new({source = source, layout = layout, matcher = matcher, mappings = mappings})
+  local layout = M.pickers.default_layout
+  local picker = Picker.new({
+    source = source,
+    layout = layout,
+    matcher = matcher,
+    mappings = M.pickers.default_mappings,
+  })
+  picker:run()
+end
+
+function M.find_buffers()
+  matcher.restart()
+  local source = require("sources.buffers").new()
+  local layout = M.pickers.default_layout:clone()
+  local picker = Picker.new({
+    source = source,
+    layout = layout,
+    matcher = matcher,
+    mappings = M.pickers.default_mappings,
+  })
   picker:run()
 end
 
 function M.last_picker()
 end
 
----@class nucleo.find_buffers
-M.find_buffers = {
-  ---@class nucleo.find_buffers.spec
-  spec = {
-    layout = ClassicLayoutFabric,
-  },
-  ---@param self nucleo.find_buffers
-  ---@param opts nucleo.find_buffers.spec
-  run = function(self, opts)
-    -- local picker = Picker.new(config.pickers.find_files)
-    print(opts)
-  end
-}
-
--- M.find_buffers:go("aboba")
-M.find_buffers:run()
+-- ---@class nucleo.find_buffers
+-- M.find_buffers = {
+--   layout = M.pickers.default_layout:clone(),
+--   run = function(self, opts)
+--     -- local picker = Picker.new(config.pickers.find_files)
+--     print(opts)
+--   end
+-- }
+--
 
 
 return M

@@ -10,7 +10,6 @@ function M.new()
   return self
 end
 
--- TODO: REALLY MESSY CODE, need to clean up
 
 local function start_stream()
   -- Should write some utils function for this horro
@@ -18,7 +17,6 @@ local function start_stream()
   package.cpath = package.cpath .. ";" .. libpath
 
   local matcher = require("nucleo_matcher")
-  local should_stop = false
   local stdout = vim.uv.new_pipe(false)
   local handle
 
@@ -42,7 +40,7 @@ local function start_stream()
     local status
     if data then
       for _, value in ipairs(vim.split(data, "\n")) do
-        status = matcher.add_item(value, "")
+        status = matcher.add_item(value, vim.json.encode({filename = value}))
         if status == 1 then
           close_all_handles()
           break
@@ -54,14 +52,14 @@ local function start_stream()
   vim.uv.run("default")
 end
 
-function files:start(on_exit)
+function files:start(matcher)
   self.is_running = true
   self.start_time = vim.uv.now()
   local work = vim.uv.new_work(start_stream, function(...)
     self.is_running = false
     local finish_time = vim.uv.now() - self.start_time
     print("source took time: " .. finish_time)
-    on_exit()
+    -- on_exit()
   end)
   work:queue()
 end

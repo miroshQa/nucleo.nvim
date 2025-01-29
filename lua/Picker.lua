@@ -18,8 +18,8 @@ function M.new(spec)
   self.layout = spec.layout
   self.renderer = Renderer.new(self)
   self.query = query.new(self)
-  self.prompt = prompt.new(picker)
-  self.previewer = previewer.new()
+  self.prompt = prompt.new(self)
+  self.previewer = previewer.new(self)
   -- self.formatter = formatter
 
   for mode, mappings_tbl in pairs(spec.mappings) do
@@ -36,10 +36,7 @@ end
 
 function Picker:run()
   self.layout:open(self)
-  self.source:start(function()
-    -- self.renderer:stop()
-    -- self.renderer:render()
-  end)
+  self.source:start(self.matcher)
   self.renderer:start()
 end
 
