@@ -14,7 +14,7 @@
 ---@field add_item fun(self, matchable: string, data: string): number data - (some serialized lua table as string). Return current status
 ---@field matched_items fun(self, left: number, right: number): table Return lua tables. First value is matchable second is data. Third is indices to higlight matchable
 ---@field get_matched_item fun(self, index: number): table Get item by index (0 based indexation) Return lua table. First value is matchable second is data.
----@field tick fun(self, timeout: number): boolean Return true if matcher still running
+---@field tick fun(self, timeout: number): boolean, boolean Return true if matcher still running as first parameter. Return if matched items changed and you should update prompt buffer as second parameter
 ---@field item_count fun(self): number Returns the amount of items added to memory.
 ---@field matched_item_count fun(self): number Returns the amount of items matching the pattern.
 ---@field set_pattern fun(self, pattern: string): nil Sets the pattern

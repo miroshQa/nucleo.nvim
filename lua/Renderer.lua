@@ -18,7 +18,8 @@ function renderer:start()
   self.timer:start(10, 30, function()
     vim.schedule(function ()
       if self.timer:is_active() then
-        self.picker.matcher:tick(10)
+        local running, changed = self.picker.matcher:tick(10)
+        print(running, changed)
         self:render()
       end
     end)
@@ -38,10 +39,6 @@ function renderer:render()
     self.picker.query:update()
     self.picker.prompt:update()
     self.picker.previewer:update()
-    -- for i, item in ipairs(items) do
-    --   local indices = item[3]
-    --   -- highlight.apply_indices(self.picker.prompt.buf, i - 1, indices)
-    -- end
   end)
 end
 

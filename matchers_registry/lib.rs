@@ -94,7 +94,8 @@ impl UserData for NucleoMatcher {
 
         methods.add_method_mut("tick", |_, matcher, timeout: u64| {
             let mut matcher = matcher.matcher.lock().unwrap();
-            Ok(matcher.tick(timeout).running)
+            let status = matcher.tick(timeout);
+            Ok((status.running, status.changed))
         });
 
         methods.add_method_mut("item_count", |_, matcher, ()| {
