@@ -10,31 +10,18 @@
 --- Matcher Interface
 --- Currently (and probably always), we only have the Helix Nucleo matcher written in Rust;
 --- there is no matcher written in Lua (like the native matcher without dependency, but slow).
---- Also, this is kind of a single global object for the whole plugin (we can't create a few instances of it).
---- Probably someone will say it is bad, but I honestly don't see any reason why we would want
---- to create and run a few of them at the same time unless we want to kill memory.
---- So the only "drawback" of this approach I see is that we can restore only the last run picker,
---- but that is not a drawback at all; the previous one is more than enough.
---- We don't want to store many of them and clutter memory.
---- Any Nucleo.Source is also a single global object for the same reason.
 ---@class nucleo.Matcher
----@field add_item fun(matchable: string, data: string): number data - (some serialized lua table as string). Return current status
----@field matched_items fun(left: number, right: number): table Return lua tables. First value is matchable second is data. Third is indices to higlight matchable
----@field get_matched_item fun(index: number): table Get item by index (0 based indexation) Return lua table. First value is matchable second is data.
----@field tick fun(timeout: number): boolean Return true if matcher still running
----@field item_count fun(): number Returns the amount of items added to memory.
----@field matched_item_count fun(): number Returns the amount of items matching the pattern.
----@field set_pattern fun(pattern: string): nil Sets the pattern
----@field restart fun(): nil Removes all items added to memory.
----@field set_status fun(status: number) You can set arbitrary number to indicate some status for streamer,
+---@field add_item fun(self, matchable: string, data: string): number data - (some serialized lua table as string). Return current status
+---@field matched_items fun(self, left: number, right: number): table Return lua tables. First value is matchable second is data. Third is indices to higlight matchable
+---@field get_matched_item fun(self, index: number): table Get item by index (0 based indexation) Return lua table. First value is matchable second is data.
+---@field tick fun(self, timeout: number): boolean Return true if matcher still running
+---@field item_count fun(self): number Returns the amount of items added to memory.
+---@field matched_item_count fun(self): number Returns the amount of items matching the pattern.
+---@field set_pattern fun(self, pattern: string): nil Sets the pattern
+---@field restart fun(self, ): nil Removes all items added to memory.
+---@field set_status fun(self, status: number) You can set arbitrary number to indicate some status for streamer,
+---@field get_id fun(self): number You can set arbitrary number to indicate some status for streamer,
 --- so after each add_item source should check status and react on it somehow, for example stop streaming if status is 1
 
 ---@alias nucleo.picker.action fun(picker: nucleo.Picker)
 ---@alias nucleo.picker.mapings table<string, table<string, nucleo.picker.action>>
-
----@class nucleo.picker.spec
----@field source nucleo.Source
----@field matcher nucleo.Matcher
----@field layout nucleo.Layout
----@field previewer nucleo.Previewer
----@field mappings nucleo.picker.mapings

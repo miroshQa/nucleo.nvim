@@ -6,7 +6,6 @@ local files = {}
 function M.new()
 ---@class nucleo.Source
   local self = setmetatable({}, {__index = files})
-  self.is_running = false
   return self
 end
 
@@ -53,15 +52,8 @@ local function start_stream(matcher_id)
   vim.uv.run("default")
 end
 
-function files:start(matcher)
-  self.is_running = true
-  self.start_time = vim.uv.now()
-  local work = vim.uv.new_work(start_stream, function(...)
-    self.is_running = false
-    local finish_time = vim.uv.now() - self.start_time
-    print("source took time: " .. finish_time)
-    -- on_exit()
-  end)
+function files:start(matcher, on_exit)
+  local work = vim.uv.new_work(start_stream, function(...) on_exit() end)
   work:queue(matcher:get_id())
 end
 
