@@ -15,7 +15,7 @@ function M.new(spec)
   local self = setmetatable({}, { __index = Picker })
   self.source = spec.source
   self.matcher_id = spec.matcher_id
-  self.matcher = require("nucleo_matcher").get_matcher_by_id(spec.matcher_id)
+  self.matcher = require("matchers_registry").get_matcher_by_id(spec.matcher_id)
   self.layout = spec.layout
   self.renderer = Renderer.new(self)
   self.query = query.new(self)

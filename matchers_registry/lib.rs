@@ -132,9 +132,8 @@ impl UserData for NucleoMatcher {
     }
 }
 
-// We should call it matchers_registry now, should change it later
 #[mlua::lua_module(skip_memory_check)]
-fn nucleo_matcher(lua: &Lua) -> LuaResult<LuaTable> {
+fn matchers_registry(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
 
     exports.set("new_nucleo_matcher", lua.create_function(

@@ -24,7 +24,7 @@ M.pickers.default_mappings = {
 
 function M.find_files()
   print("trying to create matcher")
-  local matcher_id = require("nucleo_matcher").new_nucleo_matcher()
+  local matcher_id = require("matchers_registry").new_nucleo_matcher()
   print("id is: " .. matcher_id)
   print("After create")
   local source = require("sources.files").new()

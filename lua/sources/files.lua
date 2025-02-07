@@ -16,7 +16,7 @@ local function start_stream(matcher_id)
   local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "../../target/release/lib?.so"
   package.cpath = package.cpath .. ";" .. libpath
 
-  local matcher = require("nucleo_matcher").get_matcher_by_id(matcher_id)
+  local matcher = require("matchers_registry").get_matcher_by_id(matcher_id)
   local stdout = vim.uv.new_pipe(false)
   local handle
 
