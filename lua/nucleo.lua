@@ -3,7 +3,6 @@ local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "./../target/release
 package.cpath = package.cpath .. ";" .. libpath
 
 local config = require("config")
-local matcher = require("nucleo_matcher")
 local Picker = require("Picker")
 local M = {}
 M.pickers = {}
@@ -24,30 +23,33 @@ M.pickers.default_mappings = {
 }
 
 function M.find_files()
-  matcher.restart()
+  print("trying to create matcher")
+  local matcher_id = require("nucleo_matcher").new_nucleo_matcher()
+  print("id is: " .. matcher_id)
+  print("After create")
   local source = require("sources.files").new()
   local layout = M.pickers.default_layout
   local picker = Picker.new({
     source = source,
     layout = layout,
-    matcher = matcher,
+    matcher_id = matcher_id,
     mappings = M.pickers.default_mappings,
   })
   picker:run()
 end
 
-function M.find_buffers()
-  matcher.restart()
-  local source = require("sources.buffers").new()
-  local layout = M.pickers.default_layout:clone()
-  local picker = Picker.new({
-    source = source,
-    layout = layout,
-    matcher = matcher,
-    mappings = M.pickers.default_mappings,
-  })
-  picker:run()
-end
+-- function M.find_buffers()
+--   matcher.restart()
+--   local source = require("sources.buffers").new()
+--   local layout = M.pickers.default_layout:clone()
+--   local picker = Picker.new({
+--     source = source,
+--     layout = layout,
+--     matcher = matcher,
+--     mappings = M.pickers.default_mappings,
+--   })
+--   picker:run()
+-- end
 
 function M.last_picker()
 end

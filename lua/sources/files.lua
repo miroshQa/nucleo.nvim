@@ -11,12 +11,12 @@ function M.new()
 end
 
 
-local function start_stream()
+local function start_stream(matcher_id)
   -- Should write some utils function for this horro
   local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "../../target/release/lib?.so"
   package.cpath = package.cpath .. ";" .. libpath
 
-  local matcher = require("nucleo_matcher")
+  local matcher = require("nucleo_matcher").get_matcher_by_id(matcher_id)
   local stdout = vim.uv.new_pipe(false)
   local handle
 
@@ -41,7 +41,7 @@ local function start_stream()
     local status
     if data then
       for _, value in ipairs(vim.split(data, "\n")) do
-        status = matcher.add_item(value, "")
+        status = matcher:add_item(value, "")
         if status == 1 then
           close_all_handles()
           break
@@ -53,7 +53,7 @@ local function start_stream()
   vim.uv.run("default")
 end
 
-function files:start(matcher)
+function files:start(matcher_id)
   self.is_running = true
   self.start_time = vim.uv.now()
   local work = vim.uv.new_work(start_stream, function(...)
@@ -62,7 +62,7 @@ function files:start(matcher)
     print("source took time: " .. finish_time)
     -- on_exit()
   end)
-  work:queue()
+  work:queue(matcher_id)
 end
 
 M.actions = {

@@ -20,12 +20,12 @@ end
 
 function previewer:update()
   -- specific code for find_files picker, need to abstract this stuff 
-  local matched_items_count = self.picker.matcher.matched_item_count()
+  local matched_items_count = self.picker.matcher:matched_item_count()
   local cursor = self.picker.prompt.selected
   if matched_items_count <= cursor then
     return
   end
-  local item = self.picker.matcher.get_matched_item(cursor)
+  local item = self.picker.matcher:get_matched_item(cursor)
   local file_name = item[1]
   local stat = vim.uv.fs_stat(file_name)
   if not stat or stat.type == "directory" or stat.size > 100 * 1024 then

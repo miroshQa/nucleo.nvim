@@ -18,7 +18,7 @@ function renderer:start()
   self.timer:start(10, 30, function()
     vim.schedule(function ()
       if self.timer:is_active() then
-        self.picker.matcher.tick(10)
+        self.picker.matcher:tick(10)
         self:render()
       end
     end)

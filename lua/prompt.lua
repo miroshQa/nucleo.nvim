@@ -15,7 +15,7 @@ function M.new(picker)
 end
 
 function prompt:move_down()
-  local matched = self.picker.matcher.matched_item_count()
+  local matched = self.picker.matcher:matched_item_count()
   self.selected = (self.selected + 1) % matched
   vim.api.nvim_buf_call(self.buf, function()
     vim.cmd("norm! j")
@@ -23,7 +23,7 @@ function prompt:move_down()
 end
 
 function prompt:move_up()
-  local matched = self.picker.matcher.matched_item_count()
+  local matched = self.picker.matcher:matched_item_count()
   self.selected = (self.selected - 1) % matched
   vim.api.nvim_buf_call(self.buf, function()
     vim.cmd("norm! k")
@@ -40,7 +40,7 @@ function prompt:update()
   local right = self.selected + (win_height - win_cursor)
   -- print(win_cursor, self.selected, "(", left, right, ")")
 
-  local items = self.picker.matcher.matched_items(left, right)
+  local items = self.picker.matcher:matched_items(left, right)
   local matchables = vim.iter(items):map(function(v) return v[1] end):totable()
   vim.api.nvim_buf_set_lines(self.picker.prompt.buf, 0, -1, false, matchables)
 end

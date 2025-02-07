@@ -19,7 +19,7 @@ function M.new(picker)
       local now = vim.uv.now()
       if now - self.last_tick_time > 10 then
         local pattern = vim.trim(vim.api.nvim_get_current_line())
-        self.picker.matcher.set_pattern(pattern)
+        self.picker.matcher:set_pattern(pattern)
         self.last_tick_time = now
       end
     end, buffer = self.buf,
@@ -33,8 +33,8 @@ function query:destroy()
 end
 
 function query:update()
-  local total = self.picker.matcher.item_count()
-  local matched = self.picker.matcher.matched_item_count()
+  local total = self.picker.matcher:item_count()
+  local matched = self.picker.matcher:matched_item_count()
 
   if self.mark_id then
     vim.api.nvim_buf_del_extmark(self.picker.query.buf, self.ns_id, self.mark_id)
