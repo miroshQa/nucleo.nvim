@@ -15,9 +15,9 @@ struct MatcherItem {
 
 // Hmmm... Is it possible to define it easier?
 lazy_static! {
-    static ref MATCHER: Arc<Mutex<Nucleo<MatcherItem>>> = Arc::new(Mutex::new(Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1)));
-    static ref LOWLEVEL_MATCHER: Arc<Mutex<Matcher>> = Arc::new(Mutex::new(Matcher::new(Config::DEFAULT)));
-    static ref STATUS: Arc<Mutex<i32>> = Arc::new(Mutex::new(0));
+    static ref MATCHER: Mutex<Nucleo<MatcherItem>> = Mutex::new(Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1));
+    static ref LOWLEVEL_MATCHER: Mutex<Matcher> = Mutex::new(Matcher::new(Config::DEFAULT));
+    static ref STATUS: Mutex<i32> = Mutex::new(0);
 }
 
 fn set_status(_: &Lua, new_status: i32) -> mlua::Result<()> {

@@ -25,7 +25,7 @@ M.pickers.default_mappings = {
 
 function M.find_files()
   matcher.restart()
-  local source = require("sources.files_async").new()
+  local source = require("sources.files").new()
   local layout = M.pickers.default_layout
   local picker = Picker.new({
     source = source,

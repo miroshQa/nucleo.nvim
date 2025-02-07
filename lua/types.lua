@@ -5,7 +5,7 @@
 --- should just pass options through some .opts field, each source can define it own opts structure)
 --- you can signal 
 ---@class nucleo.Source
----@field start fun(matcher: nucleo.Matcher, on_exit: fun())
+---@field start fun(self, matcher: nucleo.Matcher, on_exit: fun())
 
 --- Matcher Interface
 --- Currently (and probably always), we only have the Helix Nucleo matcher written in Rust;
