@@ -60,6 +60,7 @@ impl UserData for NucleoMatcher {
                 let right = min(right, snapshot.matched_item_count());
                 for item in snapshot.matched_items(left..right) {
                     let tbl = lua.create_table_with_capacity(3, 0)?;
+                    indices.clear();
                     pattern.indices(
                         item.matcher_columns[0].slice(..),
                         &mut lowlevel_matcher,

@@ -19,8 +19,9 @@ function renderer:start()
     vim.schedule(function ()
       if self.timer:is_active() then
         local running, changed = self.picker.matcher:tick(10)
-        print(running, changed)
-        self:render()
+        if changed then
+          self:render()
+        end
       end
     end)
   end)
@@ -32,7 +33,6 @@ end
 
 function renderer:render()
   vim.schedule(function()
-    -- print("rendered " .. vim.uv.now())
     if not self.picker.layout.is_open then
       return
     end
