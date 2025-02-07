@@ -3,7 +3,7 @@ use mlua::{Lua, UserData, UserDataMethods};
 
 use lazy_static::lazy_static;
 use nucleo::pattern::{CaseMatching, Normalization};
-use nucleo::{Config, Matcher, Nucleo};
+use nucleo::{Config, Injector, Matcher, Nucleo};
 use std::cmp::min;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
@@ -18,6 +18,7 @@ struct MatcherItem {
 struct NucleoMatcher {
     matcher: Arc<Mutex<Nucleo<MatcherItem>>>,
     status: Arc<Mutex<u32>>,
+    injector: Arc<Mutex<Injector<MatcherItem>>>,
     id: u32,
 }
 
@@ -32,9 +33,7 @@ impl UserData for NucleoMatcher {
             "add_item",
             |_, matcher, (matchable, data): (String, String)| {
                 let status = matcher.status.lock().unwrap().clone();
-                let matcher = matcher.matcher.lock().unwrap();
-                // Hm, will it be faster if i start to reuse some static injector
-                let injector = matcher.injector();
+                let injector = matcher.injector.lock().unwrap();
                 let item = MatcherItem { matchable, data };
                 injector.push(item, |item, row| {
                     row[0] = item.matchable.clone().into();
@@ -148,11 +147,13 @@ fn matchers_registry(lua: &Lua) -> LuaResult<LuaTable> {
                 None,
                 1,
             )));
+            let injector = Arc::new(Mutex::new(matcher.lock().unwrap().injector()));
             // hmm, that probably may cause issues on 32bit architectures
             let id = Arc::as_ptr(&matcher) as u32;
             let nucleo = NucleoMatcher {
                 matcher,
                 status: Arc::new(Mutex::new(0)),
+                injector,
                 id,
             };
             let ret = nucleo.clone();
