@@ -53,7 +53,8 @@ local function start_stream(matcher_id)
   vim.uv.run("default")
 end
 
-function files:start(matcher_id)
+function files:start(matcher)
+  print(matcher)
   self.is_running = true
   self.start_time = vim.uv.now()
   local work = vim.uv.new_work(start_stream, function(...)
@@ -62,7 +63,7 @@ function files:start(matcher_id)
     print("source took time: " .. finish_time)
     -- on_exit()
   end)
-  work:queue(matcher_id)
+  work:queue(matcher:get_id())
 end
 
 M.actions = {

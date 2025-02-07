@@ -14,11 +14,11 @@ struct MatcherItem {
     data: String,
 }
 
-// 2400 ms was before this refactor for find_files
 #[derive(Clone)]
 struct NucleoMatcher {
     matcher: Arc<Mutex<Nucleo<MatcherItem>>>,
     status: Arc<Mutex<u32>>,
+    id: u32,
 }
 
 lazy_static! {
@@ -61,8 +61,6 @@ impl UserData for NucleoMatcher {
                 let right = min(right, snapshot.matched_item_count());
                 for item in snapshot.matched_items(left..right) {
                     let tbl = lua.create_table_with_capacity(3, 0)?;
-                    // NOTE: Can we gain benefits in performance and convenience by using user data here?
-                    // Can easily measure using libuv btw
                     pattern.indices(
                         item.matcher_columns[0].slice(..),
                         &mut lowlevel_matcher,
@@ -129,6 +127,11 @@ impl UserData for NucleoMatcher {
             tbl.raw_push(item.data.data.clone())?;
             Ok(tbl)
         });
+
+        methods.add_method_mut("get_id", |lua: &Lua, matcher, _: ()| {
+            Ok(matcher.id)
+        });
+
     }
 }
 
@@ -136,27 +139,37 @@ impl UserData for NucleoMatcher {
 fn matchers_registry(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
 
-    exports.set("new_nucleo_matcher", lua.create_function(
-        |lua: &Lua, _: ()| {
+    exports.set(
+        "new_nucleo_matcher",
+        lua.create_function(|_: &Lua, _: ()| {
+            let matcher = Arc::new(Mutex::new(Nucleo::new(
+                Config::DEFAULT,
+                Arc::new(|| {}),
+                None,
+                1,
+            )));
+            // hmm, that probably may cause issues on 32bit architectures
+            let id = Arc::as_ptr(&matcher) as u32;
             let nucleo = NucleoMatcher {
-                matcher: Arc::new(Mutex::new(Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1))),
+                matcher,
                 status: Arc::new(Mutex::new(0)),
+                id,
             };
+            let ret = nucleo.clone();
             let mut registry = REGISTRY.lock().unwrap();
-            let id = 5;
             registry.insert(id, nucleo);
-            Ok(id)
-        }
-    )?)?;
+            Ok(ret)
+        })?,
+    )?;
 
-    exports.set("get_matcher_by_id", lua.create_function(
-        |lua: &Lua, id: u32| {
+    exports.set(
+        "get_matcher_by_id",
+        lua.create_function(|_: &Lua, id: u32| {
             let registry = REGISTRY.lock().unwrap();
             let matcher = registry.get(&id).unwrap();
             Ok(matcher.clone())
-        }
-    )?)?;
-
+        })?,
+    )?;
 
     Ok(exports)
 }

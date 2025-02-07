@@ -14,8 +14,7 @@ function M.new(spec)
   ---@class nucleo.Picker
   local self = setmetatable({}, { __index = Picker })
   self.source = spec.source
-  self.matcher_id = spec.matcher_id
-  self.matcher = require("matchers_registry").get_matcher_by_id(spec.matcher_id)
+  self.matcher = spec.matcher
   self.layout = spec.layout
   self.renderer = Renderer.new(self)
   self.query = query.new(self)
@@ -36,7 +35,7 @@ end
 function Picker:run()
   self.layout:open(self)
   local start = vim.uv.now()
-  self.source:start(self.matcher_id, function()
+  self.source:start(self.matcher, function()
     print("source took ms: " ..  (vim.uv.now() - start)) 
   end)
   self.renderer:start()

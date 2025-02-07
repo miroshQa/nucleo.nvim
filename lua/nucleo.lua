@@ -4,6 +4,7 @@ package.cpath = package.cpath .. ";" .. libpath
 
 local config = require("config")
 local Picker = require("Picker")
+local registry = require("matchers_registry")
 local M = {}
 M.pickers = {}
 M.pickers.default_layout = require("layouts.classic").new()
@@ -23,16 +24,14 @@ M.pickers.default_mappings = {
 }
 
 function M.find_files()
-  print("trying to create matcher")
-  local matcher_id = require("matchers_registry").new_nucleo_matcher()
-  print("id is: " .. matcher_id)
-  print("After create")
+  local matcher = registry.new_nucleo_matcher()
+  print("new matcher id is " .. matcher:get_id())
   local source = require("sources.files").new()
   local layout = M.pickers.default_layout
   local picker = Picker.new({
     source = source,
     layout = layout,
-    matcher_id = matcher_id,
+    matcher = matcher,
     mappings = M.pickers.default_mappings,
   })
   picker:run()
