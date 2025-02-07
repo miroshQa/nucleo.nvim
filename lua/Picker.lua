@@ -1,27 +1,30 @@
-local Renderer = require("Renderer")
 local query = require("query")
 local prompt = require("prompt")
 local previewer = require("previewer")
+local Renderer = require("Renderer")
 
 local M = {}
 
 ---@class nucleo.Picker
 local Picker = {}
 
+---@class nucleo.Picker.Components
+---@field source nucleo.Source
+---@field matcher nucleo.Matcher
+---@field layout nucleo.Layout
+---@field mappings nucleo.picker.mapings
+
 ---Create new picker
----@param spec nucleo.picker.spec
-function M.new(spec)
-  ---@class nucleo.Picker
-  local self = setmetatable({}, { __index = Picker })
-  self.source = spec.source
-  self.matcher = spec.matcher
-  self.layout = spec.layout
-  self.renderer = Renderer.new(self)
+---@param components nucleo.Picker.Components
+function M.new(components)
+  ---@class nucleo.Picker: nucleo.Picker.Components
+  local self = setmetatable(components, { __index = Picker })
   self.query = query.new(self)
   self.prompt = prompt.new(self)
   self.previewer = previewer.new(self)
+  self.renderer = Renderer.new(self)
 
-  for mode, mappings_tbl in pairs(spec.mappings) do
+  for mode, mappings_tbl in pairs(self.mappings) do
     for key, action in pairs(mappings_tbl) do
       vim.keymap.set(mode, key, function()
         action(self)
@@ -36,7 +39,7 @@ function Picker:run()
   self.layout:open(self)
   local start = vim.uv.now()
   self.source:start(self.matcher, function()
-    print("source took ms: " ..  (vim.uv.now() - start)) 
+    print("source took ms: " ..  (vim.uv.now() - start))
   end)
   self.renderer:start()
 end
