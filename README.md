@@ -15,19 +15,7 @@
   "miroshQa/nucleo.nvim",
   build = "cargo build --release",
   config = function()
-    -- Some essential keymaps
-    vim.keymap.set("n", "<leader>f", function() require("nucleo").find_files() end )
-    -- commented keymaps currently not implemented yet
-    -- vim.keymap.set("n", "<leader>/", function() require("nucleo").live_grep() end )
-    -- vim.keymap.set("n", "<leader>'", function() require("nucleo").last_picker() end )
-    --
-    -- vim.keymap.set("n", "<leader>b", function() require("nucleo").buffers() end )
-    -- vim.keymap.set("n", "<leader>j", function() require("nucleo").jumplist() end )
-    -- vim.keymap.set("n", "<leader>g", function() require("nucleo").git_changed() end )
-    -- vim.keymap.set("n", "<leader>s", function() require("nucleo").lsp_symbols() end )
-    -- vim.keymap.set("n", "<leader>S", function() require("nucleo").lsp_workspace_symbols() end )
-    -- vim.keymap.set("n", "<leader>i", function() require("nucleo").lsp_diagnostics() end )
-    -- vim.keymap.set("n", "<leader>I", function() require("nucleo").lsp_workspace_diagnostics() end )
+    vim.keymap.set("n", "<leader>f", function() require("pickers.files").run() end )
   end
 }
 ```
