@@ -13,7 +13,7 @@ function buffers:start(matcher)
   for _, buf in ipairs(vim.api.nvim_list_bufs()) do
     local name = vim.api.nvim_buf_get_name(buf)
     if name ~= "" then
-      matcher.add_item(name, "")
+      matcher:add_item(name, "")
     end
   end
 end

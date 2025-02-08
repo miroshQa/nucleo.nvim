@@ -21,6 +21,7 @@ function prompt:move_down()
   vim.api.nvim_buf_call(self.buf, function()
     vim.cmd("norm! j")
   end)
+  self.picker.previewer:update()
 end
 
 function prompt:move_up()
@@ -29,6 +30,7 @@ function prompt:move_up()
   vim.api.nvim_buf_call(self.buf, function()
     vim.cmd("norm! k")
   end)
+  self.picker.previewer:update()
 end
 
 function prompt:update()

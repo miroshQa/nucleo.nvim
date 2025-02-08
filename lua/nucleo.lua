@@ -1,4 +1,4 @@
-local common_actions = require "sources.common_actions"
+local common_actions = require "common_actions"
 local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "./../target/release/lib?.so"
 package.cpath = package.cpath .. ";" .. libpath
 
@@ -26,9 +26,12 @@ M.pickers.default_mappings = {
 
 function M.find_files()
   local matcher = registry.new_nucleo_matcher()
-  print("new matcher id is " .. matcher:get_id())
+  local source = require("sources.NewThreadProc").new({
+    spawn_cmd = "rg",
+    spawn_args = { "--files", "--no-messages", "--color", "never", "--hidden" },
+  })
   local picker = Picker.new({
-    source = require("sources.files").new(),
+    source = source,
     layout = M.pickers.default_layout:clone(),
     matcher = matcher,
     mappings = M.pickers.default_mappings,
