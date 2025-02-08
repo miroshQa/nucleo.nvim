@@ -13,14 +13,10 @@ package.cpath = package.cpath .. ";" .. libpath
 ---@field matched_item_count fun(self): number Returns the amount of items matching the pattern.
 ---@field set_pattern fun(self, pattern: string): nil Sets the pattern
 ---@field restart fun(self): nil Removes all items added to memory.
----@field set_status fun(self, status: number) You can set arbitrary number to indicate some status for streamer,
----@field get_id fun(self): number You can set arbitrary number to indicate some status for streamer,
 --- so after each add_item source should check status and react on it somehow, for example stop streaming if status is 1
 
 ---@class nucleo.Registry
 ---@field new_nucleo_matcher fun(): nucleo.Matcher
----@field get_matcher_by_id fun(id: number): nucleo.Matcher
----@field remove_matcher_by_id fun(id: number) 
 
 ---@type nucleo.Registry
 local Registry = require("matchers_registry")

@@ -16,16 +16,14 @@ struct MatcherItem {
     data: String,
 }
 
+// with mutexes we have 2600 on the main thread, without 4600, how to fuck does it work??
 #[derive(Clone)]
 struct NucleoMatcher {
-    matcher: Arc<Mutex<Nucleo<MatcherItem>>>,
-    status: Arc<Mutex<u32>>,
-    injector: Arc<Mutex<Injector<MatcherItem>>>,
-    id: u32,
+    matcher: *mut Nucleo<MatcherItem>,
+    injector: *mut Injector<MatcherItem>,
 }
 
 lazy_static! {
-    static ref REGISTRY: Mutex<HashMap<u32, NucleoMatcher>> = Mutex::new(HashMap::new());
     static ref LOWLEVEL_MATCHER: Mutex<Matcher> = Mutex::new(Matcher::new(Config::DEFAULT));
 }
 
@@ -34,26 +32,19 @@ impl UserData for NucleoMatcher {
         methods.add_method_mut(
             "add_item",
             |_, matcher, (matchable, data): (String, String)| {
-                let status = matcher.status.lock().unwrap().clone();
-                let injector = matcher.injector.lock().unwrap();
                 let item = MatcherItem { matchable, data };
+                let injector = unsafe { matcher.injector.as_ref().unwrap() };
                 injector.push(item, |item, row| {
                     row[0] = item.matchable.clone().into();
                 });
-                Ok(status)
+                Ok(())
             },
         );
-
-        methods.add_method_mut("set_status", |_, matcher, new_status: u32| {
-            let mut status = matcher.status.lock().unwrap();
-            *status = new_status;
-            Ok(())
-        });
 
         methods.add_method_mut(
             "matched_items",
             |lua: &Lua, matcher, (left, right): (u32, u32)| {
-                let matcher = matcher.matcher.lock().unwrap();
+                let matcher = unsafe { matcher.matcher.as_ref().unwrap() };
                 let mut lowlevel_matcher = LOWLEVEL_MATCHER.lock().unwrap();
                 let mut indices: Vec<u32> = Vec::new();
                 let pattern = matcher.pattern.column_pattern(0);
@@ -83,8 +74,9 @@ impl UserData for NucleoMatcher {
             },
         );
 
+
         methods.add_method_mut("set_pattern", |_, matcher, pattern: String| {
-            let mut matcher = matcher.matcher.lock().unwrap();
+            let matcher = unsafe { matcher.matcher.as_mut().unwrap() };
             matcher.pattern.reparse(
                 0,
                 &pattern,
@@ -96,33 +88,26 @@ impl UserData for NucleoMatcher {
         });
 
         methods.add_method_mut("tick", |_, matcher, timeout: u64| {
-            let mut matcher = matcher.matcher.lock().unwrap();
+            let matcher = unsafe { matcher.matcher.as_mut().unwrap() };
             let status = matcher.tick(timeout);
             Ok((status.running, status.changed))
         });
 
+
         methods.add_method_mut("item_count", |_, matcher, ()| {
-            let matcher = matcher.matcher.lock().unwrap();
+            let matcher = unsafe { matcher.matcher.as_ref().unwrap() };
             let snapshot = matcher.snapshot();
             Ok(snapshot.item_count())
         });
 
         methods.add_method_mut("matched_item_count", |_, matcher, ()| {
-            let matcher = matcher.matcher.lock().unwrap();
+            let matcher = unsafe { matcher.matcher.as_ref().unwrap() };
             let snapshot = matcher.snapshot();
             Ok(snapshot.matched_item_count())
         });
 
-        methods.add_method_mut("restart", |_, matcher, ()| {
-            let mut status = matcher.status.lock().unwrap();
-            let mut matcher = matcher.matcher.lock().unwrap();
-            matcher.restart(false);
-            *status = 0;
-            Ok(())
-        });
-
         methods.add_method_mut("get_matched_item", |lua: &Lua, matcher, index| {
-            let matcher = matcher.matcher.lock().unwrap();
+            let matcher = unsafe { matcher.matcher.as_ref().unwrap() };
             let tbl = lua.create_table()?;
             let snapshot = matcher.snapshot();
             let item = snapshot.get_matched_item(index).unwrap();
@@ -131,25 +116,27 @@ impl UserData for NucleoMatcher {
             Ok(tbl)
         });
 
-        methods.add_method_mut("get_id", |_: &Lua, matcher, _: ()| Ok(matcher.id));
     }
 }
 
-#[cfg(feature = "debug")]
 impl Drop for NucleoMatcher {
     fn drop(&mut self) {
-        let mut file = OpenOptions::new()
-            .append(true)
-            .create(true)
-            .open("matchers_registry_log.txt")
-            .unwrap();
-        let count = Arc::strong_count(&self.matcher);
-        let msg = format!(
-                "Wrapper for matcher with id {} dropped. Real matcher amount of references: {}",
-                self.id,
-                count,
-            );
-        writeln!(file, "{}", msg);
+
+        unsafe {
+            drop(Box::from_raw(self.matcher));
+            drop(Box::from_raw(self.injector));
+        };
+
+        #[cfg(feature = "debug")]
+        {
+            let mut file = OpenOptions::new()
+                .append(true)
+                .create(true)
+                .open("matchers_registry_log.txt")
+                .unwrap();
+            let msg = format!( "Wrapper for matcher dropped");
+            writeln!(file, "{}", msg);
+        }
     }
 }
 
@@ -160,54 +147,13 @@ fn matchers_registry(lua: &Lua) -> LuaResult<LuaTable> {
     exports.set(
         "new_nucleo_matcher",
         lua.create_function(|_: &Lua, _: ()| {
-            let matcher = Arc::new(Mutex::new(Nucleo::new(
-                Config::DEFAULT,
-                Arc::new(|| {}),
-                None,
-                1,
-            )));
-            let injector = Arc::new(Mutex::new(matcher.lock().unwrap().injector()));
-            // hmm, that probably may cause issues on 32bit architectures
-            let id = Arc::as_ptr(&matcher) as u32;
+            let matcher = Box::new(Nucleo::new(Config::DEFAULT, Arc::new(|| {}), None, 1));
+            let injector = Box::new(matcher.injector());
             let nucleo = NucleoMatcher {
-                matcher,
-                status: Arc::new(Mutex::new(0)),
-                injector,
-                id,
+                matcher: Box::into_raw(matcher),
+                injector: Box::into_raw(injector),
             };
-            let ret = nucleo.clone();
-            let mut registry = REGISTRY.lock().unwrap();
-            registry.insert(id, nucleo);
-            Ok(ret)
-        })?,
-    )?;
-
-    exports.set(
-        "get_matcher_by_id",
-        lua.create_function(|_: &Lua, id: u32| {
-            let registry = REGISTRY.lock().unwrap();
-            let matcher = registry.get(&id).unwrap();
-            Ok(matcher.clone())
-        })?,
-    )?;
-
-    exports.set(
-        "remove_matcher_by_id",
-        lua.create_function(|lua: &Lua, id: u32| {
-            let mut registry = REGISTRY.lock().unwrap();
-            let matcher = registry.remove(&id).unwrap();
-            Ok(())
-        })?,
-    )?;
-
-    // this function useful mostly for debug
-    exports.set(
-        "get_matcher_references_count",
-        lua.create_function(|_: &Lua, id: u32| {
-            let registry = REGISTRY.lock().unwrap();
-            let matcher = registry.get(&id).unwrap();
-            let count = Arc::strong_count(&matcher.matcher);
-            Ok(count)
+            Ok(nucleo)
         })?,
     )?;
 

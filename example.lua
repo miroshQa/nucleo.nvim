@@ -13,10 +13,6 @@ local function create_and_drop()
   for _ = 1, n do
     matcher:add_item(str, str)
   end
-  id = matcher:get_id()
-  matcher = nil
-  collectgarbage("collect")
-  Registry.remove_matcher_by_id(id)
 end
 
 create_and_drop()
