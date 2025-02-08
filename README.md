@@ -15,7 +15,7 @@
   "miroshQa/nucleo.nvim",
   build = "cargo build --release",
   config = function()
-    vim.keymap.set("n", "<leader>f", function() require("pickers.files").run() end )
+    vim.keymap.set("n", "<leader>f", function() require("nucleo.files").run() end )
   end
 }
 ```

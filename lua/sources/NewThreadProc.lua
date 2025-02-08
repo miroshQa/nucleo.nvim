@@ -16,12 +16,10 @@ function M.new(components)
 end
 
 local function start_stream(matcher_id, spawn_args, spawn_cmd)
-  -- Should write some utils function for this horro
-  local libpath = debug.getinfo(1).source:match('@?(.*/)') .. "../../target/release/lib?.so"
-  package.cpath = package.cpath .. ";" .. libpath
+  local Registry = require("Registry")
   spawn_args = vim.json.decode(spawn_args)
 
-  local matcher = require("matchers_registry").get_matcher_by_id(matcher_id)
+  local matcher = Registry.get_matcher_by_id(matcher_id)
   local stdout = assert(vim.uv.new_pipe(false))
   local handle
 

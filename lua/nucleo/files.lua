@@ -1,7 +1,6 @@
-require("nucleo")
-local Picker = require("Picker")
-local Registry = require("matchers_registry")
 local config = require("config")
+local Picker = require("Picker")
+local Registry = require("Registry")
 
 local M = {}
 
