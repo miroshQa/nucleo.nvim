@@ -39,7 +39,12 @@ local function start_stream(matcher_id, spawn_args, spawn_cmd)
     args = spawn_args,
     stdio = { nil, stdout, nil },
   }, function(code, signal)
+    matcher = nil
+    -- hmm, it doesn't remove this object if we don't explicitly call this fucntion
+    -- and if this doesn't remove this object we leek memory and object never will be 
+    -- deleted even after Registry.remove_matcher_by_id
     close_all_handles()
+    collectgarbage("collect")
   end)
 
   local prev = nil

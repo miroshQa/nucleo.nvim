@@ -20,6 +20,7 @@ package.cpath = package.cpath .. ";" .. libpath
 ---@class nucleo.Registry
 ---@field new_nucleo_matcher fun(): nucleo.Matcher
 ---@field get_matcher_by_id fun(id: number): nucleo.Matcher
+---@field remove_matcher_by_id fun(id: number) 
 
 ---@type nucleo.Registry
 local Registry = require("matchers_registry")

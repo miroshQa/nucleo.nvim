@@ -5,7 +5,7 @@ local Query = {}
 
 ---@param picker nucleo.Picker
 function M.new(picker)
----@class nucleo.Picker.Query
+  ---@class nucleo.Picker.Query
   local self = setmetatable({}, { __index = Query })
   self.buf = vim.api.nvim_create_buf(false, true)
   self.picker = picker
@@ -13,8 +13,9 @@ function M.new(picker)
   self.ns_id = nil
 
   self.last_tick_time = 0
+  self.au_on_change =  vim.api.nvim_create_augroup("UpdateResultsOnQueryChange", { clear = true })
   vim.api.nvim_create_autocmd("TextChangedI", {
-    group = vim.api.nvim_create_augroup("UpdateResultsOnQueryChange", { clear = true }),
+    group = self.au_on_change,
     callback = function()
       local now = vim.uv.now()
       if now - self.last_tick_time > 10 then
@@ -22,14 +23,21 @@ function M.new(picker)
         self.picker.matcher:set_pattern(pattern)
         self.last_tick_time = now
       end
-    end, buffer = self.buf,
+    end,
+    buffer = self.buf,
   })
 
   return self
 end
 
 function Query:destroy()
-  vim.api.nvim_buf_delete(self.buf, {force = true})
+  vim.api.nvim_buf_delete(self.buf, { force = true })
+  -- We must especially carefully in those cases, we need to
+  -- remove all references to picker and allow to garbage collector clear
+  -- all the picker components, and more importantly matcher on the rust side
+  -- (will happen only if no references on lua side and also if
+  --  matcher was removed from registry)
+  vim.api.nvim_clear_autocmds({ group = self.au_on_change })
 end
 
 function Query:update()
@@ -45,8 +53,7 @@ function Query:update()
     id = 1,
     virt_text = { { matched .. "/" .. total } },
     virt_text_pos = 'right_align',
-})
-
+  })
 end
 
 return M

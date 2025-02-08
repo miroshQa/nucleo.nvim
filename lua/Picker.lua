@@ -6,6 +6,7 @@ local Renderer = require("Renderer")
 local M = {}
 
 ---@class nucleo.Picker
+---@field matcher nucleo.Matcher
 local Picker = {}
 
 ---@alias nucleo.picker.mappings table<string, table<string, nucleo.picker.action>>
@@ -53,6 +54,8 @@ function Picker:destroy()
   self.query:destroy()
   self.prompt:destroy()
   self.previewer:destroy()
+  self.renderer:stop()
+  self.matcher = nil
 end
 
 return M

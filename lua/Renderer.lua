@@ -28,7 +28,9 @@ function renderer:start()
 end
 
 function renderer:stop()
-  self.timer:stop()
+  if self.timer:is_active() then
+    self.timer:stop()
+  end
 end
 
 function renderer:render()

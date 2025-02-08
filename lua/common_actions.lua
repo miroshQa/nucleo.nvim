@@ -1,3 +1,4 @@
+local Registry = require("Registry")
 ---@alias nucleo.picker.action fun(picker: nucleo.Picker)
 
 ---@type table<string, nucleo.picker.action>
@@ -12,6 +13,10 @@ local actions = {
     picker.matcher:set_status(1)
     picker.renderer:stop()
     picker.layout:close()
+    local id = picker.matcher:get_id()
+    print(id)
+    Registry.remove_matcher_by_id(id)
+    picker:destroy()
   end,
   open = function(picker)
     local selected = picker.prompt.selected

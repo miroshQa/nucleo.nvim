@@ -1,11 +1,13 @@
 use mlua::prelude::*;
-use mlua::{Lua, UserData, UserDataMethods};
+use mlua::{Function, Lua, UserData, UserDataMethods};
 
 use lazy_static::lazy_static;
 use nucleo::pattern::{CaseMatching, Normalization};
 use nucleo::{Config, Injector, Matcher, Nucleo};
 use std::cmp::min;
 use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::sync::{Arc, Mutex};
 
 struct MatcherItem {
@@ -129,10 +131,25 @@ impl UserData for NucleoMatcher {
             Ok(tbl)
         });
 
-        methods.add_method_mut("get_id", |lua: &Lua, matcher, _: ()| {
-            Ok(matcher.id)
-        });
+        methods.add_method_mut("get_id", |_: &Lua, matcher, _: ()| Ok(matcher.id));
+    }
+}
 
+#[cfg(feature = "debug")]
+impl Drop for NucleoMatcher {
+    fn drop(&mut self) {
+        let mut file = OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open("matchers_registry_log.txt")
+            .unwrap();
+        let count = Arc::strong_count(&self.matcher);
+        let msg = format!(
+                "Wrapper for matcher with id {} dropped. Real matcher amount of references: {}",
+                self.id,
+                count,
+            );
+        writeln!(file, "{}", msg);
     }
 }
 
@@ -171,6 +188,26 @@ fn matchers_registry(lua: &Lua) -> LuaResult<LuaTable> {
             let registry = REGISTRY.lock().unwrap();
             let matcher = registry.get(&id).unwrap();
             Ok(matcher.clone())
+        })?,
+    )?;
+
+    exports.set(
+        "remove_matcher_by_id",
+        lua.create_function(|lua: &Lua, id: u32| {
+            let mut registry = REGISTRY.lock().unwrap();
+            let matcher = registry.remove(&id).unwrap();
+            Ok(())
+        })?,
+    )?;
+
+    // this function useful mostly for debug
+    exports.set(
+        "get_matcher_references_count",
+        lua.create_function(|_: &Lua, id: u32| {
+            let registry = REGISTRY.lock().unwrap();
+            let matcher = registry.get(&id).unwrap();
+            let count = Arc::strong_count(&matcher.matcher);
+            Ok(count)
         })?,
     )?;
 

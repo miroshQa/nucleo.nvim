@@ -4,8 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-path = "./matchers_registry//lib.rs"
+path = "./matchers_registry/lib.rs"
 crate-type = ["cdylib"]
+
+[features]
+debug = []
 
 [dependencies]
 nucleo = "0.5.0"
