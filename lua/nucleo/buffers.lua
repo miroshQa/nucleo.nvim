@@ -1,6 +1,6 @@
 local config = require("config")
-local Picker = require("Registry")
-local Registry = require("matchers_registry")
+local Picker = require("Picker")
+local Registry = require("Registry")
 
 local M = {}
 
@@ -29,7 +29,7 @@ function M.run()
     source = source,
     layout = layout,
     matcher = matcher,
-    mappings = M.pickers.default_mappings,
+    mappings = config.pickers.default_mappings,
   })
   picker:run()
 end

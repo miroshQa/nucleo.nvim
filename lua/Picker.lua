@@ -1,6 +1,6 @@
-local query = require("query")
-local prompt = require("prompt")
-local previewer = require("previewer")
+local Query = require("Query")
+local Prompt = require("Prompt")
+local Previewer = require("Previewer")
 local Renderer = require("Renderer")
 
 local M = {}
@@ -19,9 +19,9 @@ local Picker = {}
 function M.new(components)
   ---@class nucleo.Picker: nucleo.Picker.Components
   local self = setmetatable(components, { __index = Picker })
-  self.query = query.new(self)
-  self.prompt = prompt.new(self)
-  self.previewer = previewer.new(self)
+  self.query = Query.new(self)
+  self.prompt = Prompt.new(self)
+  self.previewer = Previewer.new(self)
   self.renderer = Renderer.new(self)
 
   for mode, mappings_tbl in pairs(self.mappings) do

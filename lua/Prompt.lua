@@ -2,12 +2,12 @@ local M = {}
 
 
 ---@class nucleo.Picker.Prompt
-local prompt = {}
+local Prompt = {}
 
 ---@param picker nucleo.Picker
 function M.new(picker)
 ---@class nucleo.Picker.Prompt
-  local self = setmetatable({}, { __index = prompt })
+  local self = setmetatable({}, { __index = Prompt })
   self.buf = vim.api.nvim_create_buf(false, true)
   self.selected = 0
   self.matches_hl_ns = vim.api.nvim_create_namespace("m_hl_ns")
@@ -15,7 +15,7 @@ function M.new(picker)
   return self
 end
 
-function prompt:move_down()
+function Prompt:move_down()
   local matched = self.picker.matcher:matched_item_count()
   self.selected = (self.selected + 1) % matched
   vim.api.nvim_buf_call(self.buf, function()
@@ -24,7 +24,7 @@ function prompt:move_down()
   self.picker.previewer:update()
 end
 
-function prompt:move_up()
+function Prompt:move_up()
   local matched = self.picker.matcher:matched_item_count()
   self.selected = (self.selected - 1) % matched
   vim.api.nvim_buf_call(self.buf, function()
@@ -33,7 +33,7 @@ function prompt:move_up()
   self.picker.previewer:update()
 end
 
-function prompt:update()
+function Prompt:update()
   vim.api.nvim_buf_clear_namespace(self.buf, self.matches_hl_ns, 0, -1)
   local win_height = vim.api.nvim_win_get_height(self.picker.layout.prompt_win)
   -- win cursor shouldn't be ever greater than win_height
@@ -56,7 +56,7 @@ function prompt:update()
 end
 
 
-function prompt:destroy()
+function Prompt:destroy()
   vim.api.nvim_buf_delete(self.buf, {force = true})
 end
 

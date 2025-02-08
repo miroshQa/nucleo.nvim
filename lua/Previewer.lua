@@ -2,23 +2,23 @@
 local M = {}
 
 ---@class nucleo.Picker.Previewer
-local previewer = {}
+local Previewer = {}
 
 ---@param picker nucleo.Picker
 function M.new(picker)
 ---@class nucleo.Picker.Previewer
-  local self = setmetatable({}, { __index = previewer })
+  local self = setmetatable({}, { __index = Previewer })
   self.buf = vim.api.nvim_create_buf(false, true)
   self.picker = picker
   -- self.formatter = nil
   return self
 end
 
-function previewer:destroy()
+function Previewer:destroy()
   vim.api.nvim_buf_delete(self.buf, {force = true})
 end
 
-function previewer:update()
+function Previewer:update()
   -- specific code for find_files picker, need to abstract this stuff 
   local matched_items_count = self.picker.matcher:matched_item_count()
   local cursor = self.picker.prompt.selected

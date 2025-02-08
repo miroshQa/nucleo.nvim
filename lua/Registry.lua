@@ -1,5 +1,3 @@
-print(debug.getinfo(1).source)
-print(debug.getinfo(1).source:match('@?(.*/nucleo.nvim)'))
 local libpath = debug.getinfo(1).source:match('@?(.*/nucleo.nvim)') .. "/target/release/lib?.so"
 package.cpath = package.cpath .. ";" .. libpath
 

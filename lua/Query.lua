@@ -1,12 +1,12 @@
 local M = {}
 
 ---@class nucleo.Picker.Query
-local query = {}
+local Query = {}
 
 ---@param picker nucleo.Picker
 function M.new(picker)
 ---@class nucleo.Picker.Query
-  local self = setmetatable({}, { __index = query })
+  local self = setmetatable({}, { __index = Query })
   self.buf = vim.api.nvim_create_buf(false, true)
   self.picker = picker
   self.mark_id = nil
@@ -28,11 +28,11 @@ function M.new(picker)
   return self
 end
 
-function query:destroy()
+function Query:destroy()
   vim.api.nvim_buf_delete(self.buf, {force = true})
 end
 
-function query:update()
+function Query:update()
   local total = self.picker.matcher:item_count()
   local matched = self.picker.matcher:matched_item_count()
 
