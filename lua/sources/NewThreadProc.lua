@@ -1,5 +1,8 @@
 local M = {}
 
+---@class nucleo.Source
+---@field start fun(self, matcher: nucleo.Matcher, on_exit: fun())
+
 ---@class nucleo.Source: nucleo.NewThreadProc.components
 local NewThreadProc = {}
 

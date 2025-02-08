@@ -1,3 +1,4 @@
+---@alias nucleo.picker.action fun(picker: nucleo.Picker)
 
 ---@type table<string, nucleo.picker.action>
 local actions = {

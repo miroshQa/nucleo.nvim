@@ -8,11 +8,13 @@ local M = {}
 ---@class nucleo.Picker
 local Picker = {}
 
+---@alias nucleo.picker.mappings table<string, table<string, nucleo.picker.action>>
+
 ---@class nucleo.Picker.Components
 ---@field source nucleo.Source
 ---@field matcher nucleo.Matcher
 ---@field layout nucleo.Layout
----@field mappings nucleo.picker.mapings
+---@field mappings nucleo.picker.mappings
 
 ---Create new picker
 ---@param components nucleo.Picker.Components
