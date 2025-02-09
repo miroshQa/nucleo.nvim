@@ -5,6 +5,7 @@ use lazy_static::lazy_static;
 use nucleo::pattern::{CaseMatching, Normalization};
 use nucleo::{Config, Injector, Matcher, Nucleo};
 use std::cmp::min;
+use std::thread;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -123,9 +124,13 @@ impl Drop for NucleoMatcher {
     fn drop(&mut self) {
 
         unsafe {
-            drop(Box::from_raw(self.matcher));
-            drop(Box::from_raw(self.injector));
-        };
+            let matcher = Box::from_raw(self.matcher);
+            let injector = Box::from_raw(self.injector);
+            thread::spawn(move || {
+                drop(matcher);
+                drop(injector);
+            });
+        }
 
         #[cfg(feature = "debug")]
         {
