@@ -6,7 +6,7 @@ local M = {}
 
 function M.run()
   local matcher = Registry.new_nucleo_matcher()
-  local source = require("sources.NewThreadProc").new({
+  local source = require("sources.MainThreadProc").new({
     spawn_cmd = "rg",
     spawn_args = { "--files", "--no-messages", "--color", "never", "--hidden" },
   })
