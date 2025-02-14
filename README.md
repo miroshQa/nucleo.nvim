@@ -2,8 +2,10 @@
 
 ## WIP, DONT TRY TO USE IT, I WARNED YOU!
 
-## PROJECT NOTES FOR ME
-- We should reuse existing buffers for pickers instead creating new one each time 
+## NOTES
+This project will probably never be complete but you can feel free to use
+this for reference to see how you can build highly performant fuzzy finder
+by integrating rust nucleo crate using C lua api via mlua rust crate
 
 ## Installation 
 ### 1. Install rust toolchain https://www.rust-lang.org/learn/get-started
@@ -19,6 +21,8 @@
   end
 }
 ```
+
+- NOTE: To see the full power of this plugin you should use files picker on home or root directory
 - NOTE: Building from source is currently the only available option.  
 - NOTE: This plugin will probably only work for Linux at the moment.  
 - NOTE: This plugin is 1% ready and is more of a proof of concept than a really working something  
