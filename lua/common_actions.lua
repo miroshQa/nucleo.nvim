@@ -19,6 +19,7 @@ local actions = {
     local file_name = item[1]
     picker.layout:close()
     vim.cmd("e " .. file_name)
+    picker:destroy()
   end
 }
 

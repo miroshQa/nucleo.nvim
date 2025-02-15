@@ -23,9 +23,6 @@ local function start_stream(matcher, streamer, cb, on_exit)
   local stdout = assert(vim.uv.new_pipe(false))
   local handle
 
-  local timer = vim.uv.new_timer()
-  local co = coroutine.running()
-
   local function close_all_handles()
     for _, h in ipairs({ stdout, handle }) do
       if h:is_active() then
@@ -80,8 +77,7 @@ local function start_stream(matcher, streamer, cb, on_exit)
 end
 
 function MainThreadProc:start(matcher, cb, on_exit)
-  local stream = coroutine.create(start_stream)
-  coroutine.resume(stream, matcher, self, cb, on_exit)
+  start_stream(matcher, self, cb, on_exit)
 end
 
 return M
