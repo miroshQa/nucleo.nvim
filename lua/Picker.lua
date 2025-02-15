@@ -38,35 +38,27 @@ end
 
 function Picker:run()
   self.layout:open(self)
+  local thread = self.source:start(self.matcher)
+  local timer = vim.uv.new_timer()
   local start = vim.uv.now()
-  local last_render = vim.uv.now()
-  local pending = false
 
-  self.source:start(self.matcher,
-    function(a, b)
-      local now = vim.uv.now()
-      if not pending and now - last_render > 30 then
-        pending = true
+  render = vim.schedule_wrap(function()
+    local alive = coroutine.resume(thread)
+    if not alive then
+      print("took time: " .. vim.uv.now() - start .. "ms")
+      return
+    end
+    local running, changed = self.matcher:tick(10)
+    if changed then
+      self.query:update()
+      self.prompt:update()
+      self.previewer:update()
+      print("rendered", self.matcher:item_count(), self.matcher:matched_item_count())
+    end
+    timer:start(10, 0, render)
+  end)
 
-        vim.schedule(function()
-          local running, changed = self.matcher:tick(10)
-          if changed then
-            self.query:update()
-            self.prompt:update()
-            self.previewer:update()
-            print("rendered")
-          end
-          last_render = vim.uv.now()
-          pending = false
-        end)
-
-      end
-      self.matcher:add_item(a, b)
-    end,
-
-    function()
-      print("source took ms: " .. (vim.uv.now() - start))
-    end)
+  render()
 end
 
 --- Release memory. It is aboslutely necessary to call this method
